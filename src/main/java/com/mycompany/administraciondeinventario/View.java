@@ -175,7 +175,7 @@ public class View extends javax.swing.JFrame {
     public void openEditFrame(int row) {
         if (state.equals("Products")) {
             String[] product = dao.getProductByTable(row);
-            int id = Integer.parseInt(product[0]);
+            String id = product[0];
             String name = product[1];
             float price = Float.parseFloat(product[2]);
             String description = product[3];

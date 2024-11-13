@@ -51,7 +51,7 @@ public class ProductDAO {
 
     public String[] getProductByTable(int position) {
         String[] productDetails = new String[4];
-        String sql = "SELECT id_product, name, price, description FROM Products LIMIT 1 OFFSET ?";
+        String sql = "SELECT cod_product, name, price, description FROM Products LIMIT 1 OFFSET ?";
 
         try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
@@ -59,7 +59,7 @@ public class ProductDAO {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    productDetails[0] = rs.getString("id_product");
+                    productDetails[0] = rs.getString("cod_product");
                     productDetails[1] = rs.getString("name");
                     productDetails[2] = rs.getString("price");
                     productDetails[3] = rs.getString("description");

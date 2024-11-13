@@ -11,6 +11,7 @@ package com.mycompany.administraciondeinventario;
 public class EditFrame extends javax.swing.JFrame {
 
     private int id;
+    private String code;
     private String name;
     private float price;
     private String description;
@@ -23,11 +24,10 @@ public class EditFrame extends javax.swing.JFrame {
         OnStart();
     }
 
-    public EditFrame(int id) {
+    public EditFrame(int id, float price) {
         this.id = id;
+        this.price = price;
         this.consult = "Relation";
-        //Llamar al metodo get del dropdown
-
         OnStart();
         getData();
     }
@@ -42,8 +42,8 @@ public class EditFrame extends javax.swing.JFrame {
         getData();
     }
 
-    public EditFrame(int id, String name, float price, String description) {
-        this.id = id;
+    public EditFrame(String code, String name, float price, String description) {
+        this.code = code;
         this.name = name;
         this.price = price;
         this.description = description;
@@ -62,13 +62,22 @@ public class EditFrame extends javax.swing.JFrame {
 
     private void AlterConsult() {
         if (consult.equals("Relation")) {
-            priceField.setVisible(false);
-            priceLabel.setVisible(false);
+            priceLabel.setText("Stock");
             nameField.setVisible(false);
             nameLabel.setVisible(false);
+            descriptionField.setVisible(false);
+            descriptionLabel.setVisible(false);
         } else {
-            jComboBox1.setVisible(false);
-            comboboxabel.setVisible(false);
+            if (state.equals("Products")) {
+                nameLabel.setText("Name");
+                priceLabel.setText("Price");
+            } else {
+
+                descriptionField.setVisible(false);
+                descriptionLabel.setVisible(false);
+                nameLabel.setText("Description");
+                priceLabel.setText("Localization");
+            }
         }
         jPanel1.revalidate();
         jPanel1.repaint();
@@ -78,25 +87,26 @@ public class EditFrame extends javax.swing.JFrame {
 
         if (consult.equals("Relation")) {
             idField.setText("" + id);
+            priceField.setText(price + "€");
         } else {
             if (state.equals("Products")) {
-                idField.setText(name);
-                nameField.setText(price + "€");
-                priceField.setText(description);
+                idField.setText("" + code);
+                nameField.setText(name);
+                priceField.setText(price + "€");
+                descriptionField.setText(description);
             } else {
                 idField.setText("" + id);
                 nameField.setText(description);
                 priceField.setText(localization);
             }
         }
-
     }
 
     private void HideErrors() {
         errorId.setText("");
         errorName.setText("");
         errorPrice.setText("");
-        errorCombobox.setText("");
+        errorDescription.setText("");
     }
 
     /**
@@ -120,9 +130,9 @@ public class EditFrame extends javax.swing.JFrame {
         errorId = new javax.swing.JLabel();
         errorName = new javax.swing.JLabel();
         errorPrice = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        comboboxabel = new javax.swing.JLabel();
-        errorCombobox = new javax.swing.JLabel();
+        descriptionField = new javax.swing.JTextField();
+        errorDescription = new javax.swing.JLabel();
+        descriptionLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -178,21 +188,14 @@ public class EditFrame extends javax.swing.JFrame {
         errorPrice.setForeground(new java.awt.Color(255, 51, 51));
         errorPrice.setText("jLabel6");
 
-        jComboBox1.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBox1.setPreferredSize(new java.awt.Dimension(222, 22));
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
-            }
-        });
+        descriptionField.setPreferredSize(new java.awt.Dimension(222, 22));
 
-        comboboxabel.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
-        comboboxabel.setText("Deposit");
+        errorDescription.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
+        errorDescription.setForeground(new java.awt.Color(255, 51, 51));
+        errorDescription.setText("jLabel7");
 
-        errorCombobox.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
-        errorCombobox.setForeground(new java.awt.Color(255, 51, 51));
-        errorCombobox.setText("jLabel6");
+        descriptionLabel.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
+        descriptionLabel.setText("Description");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -221,12 +224,14 @@ public class EditFrame extends javax.swing.JFrame {
                                     .addComponent(errorPrice)
                                     .addComponent(priceField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(comboboxabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(errorCombobox)
-                                    .addComponent(errorId))))
+                                .addComponent(errorId)
+                                .addGap(184, 184, 184))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(descriptionLabel)
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(errorDescription)
+                                    .addComponent(descriptionField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(44, 44, 44))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton1)
@@ -237,30 +242,30 @@ public class EditFrame extends javax.swing.JFrame {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(20, 20, 20)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(idField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(idLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(errorId)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(comboboxabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(errorCombobox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(nameLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(14, 14, 14)
                 .addComponent(errorName)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(priceField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(priceLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(errorPrice)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(descriptionField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(descriptionLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(errorDescription)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -281,7 +286,7 @@ public class EditFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -300,17 +305,14 @@ public class EditFrame extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel comboboxabel;
-    private javax.swing.JLabel errorCombobox;
+    private javax.swing.JTextField descriptionField;
+    private javax.swing.JLabel descriptionLabel;
+    private javax.swing.JLabel errorDescription;
     private javax.swing.JLabel errorId;
     private javax.swing.JLabel errorName;
     private javax.swing.JLabel errorPrice;
@@ -318,7 +320,6 @@ public class EditFrame extends javax.swing.JFrame {
     private javax.swing.JLabel idLabel;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField nameField;
     private javax.swing.JLabel nameLabel;

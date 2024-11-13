@@ -79,13 +79,13 @@ public class DetailsFrame extends javax.swing.JFrame {
         List<String> productos = dao.getDepositsOfProduct(id_product);
         Object[][] data = convertProductListToData(productos);
 
-        String[] columnNames = {"Id", "Description", "Localization", "Configuration", "Delete"};
+        String[] columnNames = {"Id", "Description", "Localization", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
 
-                return column == 3 || column == 4;
+                return column == 3;
             }
         };
 
@@ -94,9 +94,6 @@ public class DetailsFrame extends javax.swing.JFrame {
         jTable1.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
         jTable1.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable1, this));
 
-        jTable1.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
-        jTable1.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(jTable1, this));
-
         jTable1.setSelectionBackground(jTable1.getBackground());
         jTable1.setSelectionForeground(jTable1.getForeground());
     }
@@ -104,7 +101,7 @@ public class DetailsFrame extends javax.swing.JFrame {
     private Object[][] convertProductListToData(List<String> dbList) {
 
         int productCount = dbList.size();
-        Object[][] data = new Object[productCount][5];
+        Object[][] data = new Object[productCount][4];
 
         for (int i = 0; i < productCount; i++) {
             String[] productData = dbList.get(i).split(" - ");
@@ -112,8 +109,7 @@ public class DetailsFrame extends javax.swing.JFrame {
             data[i][0] = productData.length > 0 ? productData[0] : "";
             data[i][1] = productData.length > 1 ? productData[1] : "";
             data[i][2] = productData.length > 2 ? productData[2] : "";
-            data[i][3] = "Configure";
-            data[i][4] = "Delete";
+            data[i][3] = "Delete";
         }
         return data;
     }
@@ -168,12 +164,12 @@ public class DetailsFrame extends javax.swing.JFrame {
 
         Object[][] data = convertComponentListToData(childComponents);
 
-        String[] columnNames = {"Id", "Name", "Configuration", "Delete"};
+        String[] columnNames = {"Id", "Name", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 2 || column == 3;
+                return column == 2;
             }
         };
 
@@ -181,9 +177,6 @@ public class DetailsFrame extends javax.swing.JFrame {
 
         jTable3.getColumnModel().getColumn(2).setCellRenderer(new ButtonRenderer());
         jTable3.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor(jTable3, this));
-
-        jTable3.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
-        jTable3.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable3, this));
 
         jTable3.setSelectionBackground(jTable3.getBackground());
         jTable3.setSelectionForeground(jTable3.getForeground());
@@ -195,12 +188,12 @@ public class DetailsFrame extends javax.swing.JFrame {
 
         Object[][] data = convertComponentListToData(parentComponents);
 
-        String[] columnNames = {"Id", "Name", "Configuration", "Delete"};
+        String[] columnNames = {"Id", "Name", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 2 || column == 3;
+                return column == 2;
             }
         };
 
@@ -209,15 +202,12 @@ public class DetailsFrame extends javax.swing.JFrame {
         jTable2.getColumnModel().getColumn(2).setCellRenderer(new ButtonRenderer());
         jTable2.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor(jTable2, this));
 
-        jTable2.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
-        jTable2.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable2, this));
-
         jTable2.setSelectionBackground(jTable2.getBackground());
         jTable2.setSelectionForeground(jTable2.getForeground());
     }
 
     private Object[][] convertComponentListToData(List<String> components) {
-        Object[][] data = new Object[components.size()][4];
+        Object[][] data = new Object[components.size()][3];
 
         for (int i = 0; i < components.size(); i++) {
 
@@ -225,8 +215,7 @@ public class DetailsFrame extends javax.swing.JFrame {
 
             data[i][0] = componentDetails.length > 0 ? componentDetails[0] : "";
             data[i][1] = componentDetails.length > 1 ? componentDetails[1] : "";
-            data[i][2] = "Configure";
-            data[i][3] = "Delete";
+            data[i][2] = "Delete";
         }
         return data;
     }
@@ -236,10 +225,11 @@ public class DetailsFrame extends javax.swing.JFrame {
     }
 
     public void openEditFrame(int id) {
-        //Hacer un GET con la ID del producto
-        EditFrame editFrame = new EditFrame(id);
+
+        EditFrame editFrame = new EditFrame(id, 4);
         editFrame.setVisible(true);
         editFrame.setLocationRelativeTo(null);
+
     }
 
     /**
