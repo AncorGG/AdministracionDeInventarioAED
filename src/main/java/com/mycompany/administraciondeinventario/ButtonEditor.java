@@ -32,7 +32,7 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
             public void actionPerformed(ActionEvent e) {
 
                 fireEditingStopped();
-                if (label.equals("Edit")) {
+                if (label.equals("Configure")) {
                     v.openEditFrame(table.getSelectedRow());
                 } else if (label.equals("Delete")) {
                     //Eliminar producto
@@ -52,10 +52,9 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
             public void actionPerformed(ActionEvent e) {
 
                 fireEditingStopped();
-                if (label.equals("Edit")) {
+                if (label.equals("Configure")) {
                     det.openEditFrame(table.getSelectedRow());
                 } else if (label.equals("Delete")) {
-                    //Eliminar producto
                     System.out.println("Producto Eliminado: " + table.getSelectedRow());
                 }
             }

@@ -4,6 +4,7 @@
  */
 package com.mycompany.administraciondeinventario;
 
+import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -13,6 +14,10 @@ import javax.swing.table.DefaultTableModel;
 public class View extends javax.swing.JFrame {
 
     private DefaultTableModel tableModel;
+    ProductDAO dao = new ProductDAO();
+    String state = "Products";
+
+    private java.awt.event.MouseListener tableMouseListener;
 
     public View() {
         //Look and Feel
@@ -32,30 +37,26 @@ public class View extends javax.swing.JFrame {
         //Other configs
         this.setResizable(false);
         this.setLocationRelativeTo(null);
-        LoadTable();
+        LoadProductTable();
     }
 
     public void ClearTable() {
         if (jTable1.getModel() instanceof DefaultTableModel) {
+            jTable1.removeMouseListener(tableMouseListener);
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0);
         }
     }
 
-    public void LoadTable() {
+    public void LoadProductTable() {
 
-        Object[][] data = {
-            {1, "Product A", 29.99, "Misc A", "Edit", "Delete"},
-            {2, "Product B", 49.99, "Misc B", "Edit", "Delete"},
-            {3, "Product C", 19.99, "Misc C", "Edit", "Delete"}
-        };
-
-        String[] columnNames = {"Id", "Name", "Price", "Other", "Configuration", "Delete"};
+        Object[][] data = convertProductListToData(dao.getProducts());
+        String[] columnNames = {"Id", "Name", "Price", "Description", "Shelf", "Configuration", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                if (column == 4 || column == 5) {
+                if (column == 5 || column == 6) {
                     return true;
                 }
                 return false;
@@ -64,39 +65,135 @@ public class View extends javax.swing.JFrame {
 
         jTable1.setModel(tableModel);
 
-        jTable1.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
-        jTable1.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(jTable1, this));
-
         jTable1.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
         jTable1.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(jTable1, this));
+
+        jTable1.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
+        jTable1.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor(jTable1, this));
 
         jTable1.setSelectionBackground(jTable1.getBackground());
         jTable1.setSelectionForeground(jTable1.getForeground());
 
-        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+        tableMouseListener = new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 if (evt.getClickCount() == 2) {
                     int row = jTable1.getSelectedRow();
                     if (row != -1) {
-                        DetailsFrame details = new DetailsFrame();
+                        DetailsFrame details = new DetailsFrame(state, row, View.this);
                         details.setVisible(true);
+                        state = "Relation";
+                        System.out.println(state);
                         System.out.println("Abrir info de linea " + row);
                     }
                 }
             }
-        });
+        };
+        jTable1.addMouseListener(tableMouseListener);
+    }
 
+    public void LoadDepositTable() {
+
+        Object[][] data = convertDepositListToData(dao.getDeposits());
+        String[] columnNames = {"Id", "Description", "Localizaton", "Configuration", "Delete"};
+
+        tableModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                if (column == 3 || column == 4) {
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        jTable1.setModel(tableModel);
+
+        jTable1.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+        jTable1.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable1, this));
+
+        jTable1.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
+        jTable1.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(jTable1, this));
+
+        jTable1.setSelectionBackground(jTable1.getBackground());
+        jTable1.setSelectionForeground(jTable1.getForeground());
+
+        tableMouseListener = new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    int row = jTable1.getSelectedRow();
+                    if (row != -1) {
+                        DetailsFrame details = new DetailsFrame(state, row, View.this);
+                        details.setVisible(true);
+                        state = "Relation";
+                        System.out.println(state);
+                        System.out.println("Abrir info de linea " + row);
+                    }
+                }
+            }
+        };
+        jTable1.addMouseListener(tableMouseListener);
+    }
+
+    private Object[][] convertProductListToData(List<String> dbList) {
+
+        int productCount = dbList.size();
+        Object[][] data = new Object[productCount][7];
+
+        for (int i = 0; i < productCount; i++) {
+            String[] productData = dbList.get(i).split(" - ");
+
+            data[i][0] = productData.length > 2 ? productData[1] : "";
+            data[i][1] = productData.length > 5 ? productData[2] : "";
+            data[i][2] = productData.length > 4 ? productData[4] : "";
+            data[i][3] = productData.length > 3 ? productData[3] : "";
+            data[i][4] = productData.length > 3 ? productData[5] : "";
+            data[i][5] = "Configure";
+            data[i][6] = "Delete";
+        }
+        return data;
+    }
+
+    private Object[][] convertDepositListToData(List<String> dbList) {
+
+        int productCount = dbList.size();
+        Object[][] data = new Object[productCount][5];
+
+        for (int i = 0; i < productCount; i++) {
+            String[] productData = dbList.get(i).split(" - ");
+
+            data[i][0] = productData.length > 0 ? productData[0] : "";
+            data[i][1] = productData.length > 1 ? productData[1] : "";
+            data[i][2] = productData.length > 2 ? productData[2] : "";
+            data[i][3] = "Configure";
+            data[i][4] = "Delete";
+        }
+        return data;
     }
 
     public void openEditFrame(int row) {
-        String id = jTable1.getValueAt(row, 0).toString();
-        String name = jTable1.getValueAt(row, 1).toString();
-        double price = (double) jTable1.getValueAt(row, 2);
-        
-        EditFrame editFrame = new EditFrame(id, name, price);
-        editFrame.setVisible(true);
-        editFrame.setLocationRelativeTo(null);
+        if (state.equals("Products")) {
+            String[] product = dao.getProductByTable(row);
+            int id = Integer.parseInt(product[0]);
+            String name = product[1];
+            float price = Float.parseFloat(product[2]);
+            String description = product[3];
+
+            EditFrame editFrame = new EditFrame(id, name, price, description);
+            editFrame.setVisible(true);
+            editFrame.setLocationRelativeTo(null);
+        } else {
+            String[] product = dao.getDepositByTable(row);
+            int id = Integer.parseInt(product[0]);
+            String description = product[1];
+            String localization = product[2];
+
+            EditFrame editFrame = new EditFrame(id, description, localization);
+            editFrame.setVisible(true);
+            editFrame.setLocationRelativeTo(null);
+        }
+
     }
 
     /**
@@ -277,11 +374,17 @@ public class View extends javax.swing.JFrame {
 
     private void storageBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_storageBtnActionPerformed
         panelTitle.setText("- Storage List");
+        state = "Deposit";
+        ClearTable();
+        LoadDepositTable();
         //CARGAR LA LISTA DE CONTENEDORES
     }//GEN-LAST:event_storageBtnActionPerformed
 
     private void productBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productBtnActionPerformed
         panelTitle.setText("- Product List");
+        state = "Products";
+        ClearTable();
+        LoadProductTable();
         //CARGAR LA LISTA DE PRODUCTOS
     }//GEN-LAST:event_productBtnActionPerformed
 

@@ -10,30 +10,45 @@ package com.mycompany.administraciondeinventario;
  */
 public class EditFrame extends javax.swing.JFrame {
 
-    private String id;
+    private int id;
     private String name;
-    private double price;
+    private float price;
+    private String description;
     private String consult;
+    private String localization;
+    private String state;
 
     public EditFrame(String consult) {
         this.consult = consult;
         OnStart();
     }
 
-    public EditFrame(String id, String name) {
+    public EditFrame(int id) {
         this.id = id;
-        this.name = name;
         this.consult = "Relation";
+        //Llamar al metodo get del dropdown
 
         OnStart();
         getData();
     }
 
-    public EditFrame(String id, String name, double price) {
+    public EditFrame(int id, String description, String localization) {
+        this.id = id;
+        this.description = description;
+        this.localization = localization;
+        this.consult = "Entity";
+        this.state = "Deposit";
+        OnStart();
+        getData();
+    }
+
+    public EditFrame(int id, String name, float price, String description) {
         this.id = id;
         this.name = name;
         this.price = price;
+        this.description = description;
         this.consult = "Entity";
+        this.state = "Products";
 
         OnStart();
         getData();
@@ -60,9 +75,21 @@ public class EditFrame extends javax.swing.JFrame {
     }
 
     private void getData() {
-        idField.setText(id);
-        nameField.setText(name);
-        priceField.setText(price + "€");
+
+        if (consult.equals("Relation")) {
+            idField.setText("" + id);
+        } else {
+            if (state.equals("Products")) {
+                idField.setText(name);
+                nameField.setText(price + "€");
+                priceField.setText(description);
+            } else {
+                idField.setText("" + id);
+                nameField.setText(description);
+                priceField.setText(localization);
+            }
+        }
+
     }
 
     private void HideErrors() {

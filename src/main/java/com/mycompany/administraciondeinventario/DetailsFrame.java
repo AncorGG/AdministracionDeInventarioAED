@@ -4,6 +4,9 @@
  */
 package com.mycompany.administraciondeinventario;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -12,10 +15,18 @@ import javax.swing.table.DefaultTableModel;
  * @author ancor
  */
 public class DetailsFrame extends javax.swing.JFrame {
+
     private DefaultTableModel tableModel;
+    private String state;
+    private ProductDAO dao;
+    private int row;
+    private View v;
 
-    public DetailsFrame() {
-
+    public DetailsFrame(String state, int row, View v) {
+        this.state = state;
+        this.dao = new ProductDAO();
+        this.row = row;
+        this.v = v;
         //Look and Feel
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -33,10 +44,27 @@ public class DetailsFrame extends javax.swing.JFrame {
         //Other configs
         this.setResizable(false);
         this.setLocationRelativeTo(null);
-        LoadTable(jTable1);
-        LoadTable(jTable2);
-        LoadTable(jTable3);
+        DisplayTables();
 
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                OnDispose();
+            }
+        });
+    }
+
+    public void DisplayTables() {
+
+        if (state.equals("Deposit")) {
+            LoadDepositTableForProduct(row + 1);
+            jTabbedPane1.remove(jPanel3);
+            jTabbedPane1.remove(jPanel4);
+        } else {
+            LoadProductTable(row + 1);
+            LoadParentComponentsForProduct(row + 1);
+            LoadChildComponentsForProduct(row + 1);
+        }
     }
 
     public void ClearTable() {
@@ -46,44 +74,170 @@ public class DetailsFrame extends javax.swing.JFrame {
         }
     }
 
-    public void LoadTable(JTable table) {
-        
-        Object[][] data = {
-            {1, "Product A", 29, "Edit", "Delete"},
-            {2, "Product B", 49, "Edit", "Delete"},
-            {3, "Product C", 19, "Edit", "Delete"}
-        };
+    public void LoadProductTable(int id_product) {
 
-        String[] columnNames = {"Id", "Name", "Quantity", "Configuration", "Delete"};
+        List<String> productos = dao.getDepositsOfProduct(id_product);
+        Object[][] data = convertProductListToData(productos);
+
+        String[] columnNames = {"Id", "Description", "Localization", "Configuration", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                if (column == 3 || column == 4) {
-                    return true;
-                }
-                return false;
+
+                return column == 3 || column == 4;
             }
         };
 
-        table.setModel(tableModel);
+        jTable1.setModel(tableModel);
 
-        table.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
-        table.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(table, this));
+        jTable1.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+        jTable1.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable1, this));
 
-        table.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
-        table.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(table, this));
+        jTable1.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
+        jTable1.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(jTable1, this));
 
-        table.setSelectionBackground(table.getBackground());
-        table.setSelectionForeground(table.getForeground());
+        jTable1.setSelectionBackground(jTable1.getBackground());
+        jTable1.setSelectionForeground(jTable1.getForeground());
+    }
+
+    private Object[][] convertProductListToData(List<String> dbList) {
+
+        int productCount = dbList.size();
+        Object[][] data = new Object[productCount][5];
+
+        for (int i = 0; i < productCount; i++) {
+            String[] productData = dbList.get(i).split(" - ");
+
+            data[i][0] = productData.length > 0 ? productData[0] : "";
+            data[i][1] = productData.length > 1 ? productData[1] : "";
+            data[i][2] = productData.length > 2 ? productData[2] : "";
+            data[i][3] = "Configure";
+            data[i][4] = "Delete";
+        }
+        return data;
+    }
+
+    public void LoadDepositTableForProduct(int id_deposit) {
+
+        List<String> depositos = dao.getProductsInDeposit(id_deposit);
+
+        Object[][] data = convertDepositListToData(depositos);
+
+        String[] columnNames = {"Id", "Name", "Stock", "Configuration", "Delete"};
+
+        tableModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 3 || column == 4;
+            }
+        };
+
+        jTable1.setModel(tableModel);
+
+        // Botón de configuración
+        jTable1.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+        jTable1.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable1, this));
+
+        // Botón de eliminar
+        jTable1.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
+        jTable1.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(jTable1, this));
+
+        jTable1.setSelectionBackground(jTable1.getBackground());
+        jTable1.setSelectionForeground(jTable1.getForeground());
 
     }
-    
-    public void openEditFrame(int row) {
-        String id = jTable1.getValueAt(row, 0).toString();
-        String name = jTable1.getValueAt(row, 1).toString();
-        
-        EditFrame editFrame = new EditFrame(id, name);
+
+    private Object[][] convertDepositListToData(List<String> depositos) {
+        Object[][] data = new Object[depositos.size()][5];
+
+        for (int i = 0; i < depositos.size(); i++) {
+            String[] depositoDetails = depositos.get(i).split(" - ");
+            for (int j = 0; j < depositoDetails.length; j++) {
+                data[i][j] = depositoDetails[j];
+            }
+            data[i][3] = "Configure";  // Columna de configuración
+            data[i][4] = "Delete";    // Columna de eliminar
+        }
+        return data;
+    }
+
+    public void LoadChildComponentsForProduct(int id_prod_parent) {
+
+        List<String> childComponents = dao.getChildComponents(id_prod_parent);
+
+        Object[][] data = convertComponentListToData(childComponents);
+
+        String[] columnNames = {"Id", "Name", "Configuration", "Delete"};
+
+        tableModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 2 || column == 3;
+            }
+        };
+
+        jTable3.setModel(tableModel);
+
+        jTable3.getColumnModel().getColumn(2).setCellRenderer(new ButtonRenderer());
+        jTable3.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor(jTable3, this));
+
+        jTable3.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+        jTable3.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable3, this));
+
+        jTable3.setSelectionBackground(jTable3.getBackground());
+        jTable3.setSelectionForeground(jTable3.getForeground());
+    }
+
+    public void LoadParentComponentsForProduct(int id_prod_child) {
+
+        List<String> parentComponents = dao.getParentComponents(id_prod_child);
+
+        Object[][] data = convertComponentListToData(parentComponents);
+
+        String[] columnNames = {"Id", "Name", "Configuration", "Delete"};
+
+        tableModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 2 || column == 3;
+            }
+        };
+
+        jTable2.setModel(tableModel);
+
+        jTable2.getColumnModel().getColumn(2).setCellRenderer(new ButtonRenderer());
+        jTable2.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor(jTable2, this));
+
+        jTable2.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
+        jTable2.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable2, this));
+
+        jTable2.setSelectionBackground(jTable2.getBackground());
+        jTable2.setSelectionForeground(jTable2.getForeground());
+    }
+
+    private Object[][] convertComponentListToData(List<String> components) {
+        Object[][] data = new Object[components.size()][4];
+
+        for (int i = 0; i < components.size(); i++) {
+
+            String[] componentDetails = components.get(i).split(" - ");
+
+            data[i][0] = componentDetails.length > 0 ? componentDetails[0] : "";
+            data[i][1] = componentDetails.length > 1 ? componentDetails[1] : "";
+            data[i][2] = "Configure";
+            data[i][3] = "Delete";
+        }
+        return data;
+    }
+
+    public void OnDispose() {
+        v.state = "Relation";
+    }
+
+    public void openEditFrame(int id) {
+        //Hacer un GET con la ID del producto
+        EditFrame editFrame = new EditFrame(id);
         editFrame.setVisible(true);
         editFrame.setLocationRelativeTo(null);
     }
