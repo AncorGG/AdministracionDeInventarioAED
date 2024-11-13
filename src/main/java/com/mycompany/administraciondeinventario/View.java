@@ -37,7 +37,16 @@ public class View extends javax.swing.JFrame {
         //Other configs
         this.setResizable(false);
         this.setLocationRelativeTo(null);
-        LoadProductTable();
+        Reload();
+    }
+
+    public void Reload() {
+        ClearTable();
+        if (state.equals("Products")) {
+            LoadProductTable();
+        } else {
+            LoadDepositTable();
+        }
     }
 
     public void ClearTable() {
@@ -51,12 +60,12 @@ public class View extends javax.swing.JFrame {
     public void LoadProductTable() {
 
         Object[][] data = convertProductListToData(dao.getProducts());
-        String[] columnNames = {"Id", "Name", "Price", "Description", "Shelf", "Configuration", "Delete"};
+        String[] columnNames = {"Hidden", "Id", "Name", "Price", "Description", "Shelf", "Configuration", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                if (column == 5 || column == 6) {
+                if (column == 6 || column == 7) {
                     return true;
                 }
                 return false;
@@ -64,6 +73,8 @@ public class View extends javax.swing.JFrame {
         };
 
         jTable1.setModel(tableModel);
+
+        jTable1.getColumnModel().removeColumn(jTable1.getColumnModel().getColumn(0));
 
         jTable1.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
         jTable1.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(jTable1, this));
@@ -80,11 +91,9 @@ public class View extends javax.swing.JFrame {
                 if (evt.getClickCount() == 2) {
                     int row = jTable1.getSelectedRow();
                     if (row != -1) {
-                        DetailsFrame details = new DetailsFrame(state, row, View.this);
+                        int id = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
+                        DetailsFrame details = new DetailsFrame(state, row, View.this, jTable1.getModel().getValueAt(row, 2).toString(), id);
                         details.setVisible(true);
-                        state = "Relation";
-                        System.out.println(state);
-                        System.out.println("Abrir info de linea " + row);
                     }
                 }
             }
@@ -124,11 +133,9 @@ public class View extends javax.swing.JFrame {
                 if (evt.getClickCount() == 2) {
                     int row = jTable1.getSelectedRow();
                     if (row != -1) {
-                        DetailsFrame details = new DetailsFrame(state, row, View.this);
+                        int id = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
+                        DetailsFrame details = new DetailsFrame(state, row, View.this, jTable1.getModel().getValueAt(row, 1).toString(), id);
                         details.setVisible(true);
-                        state = "Relation";
-                        System.out.println(state);
-                        System.out.println("Abrir info de linea " + row);
                     }
                 }
             }
@@ -139,18 +146,19 @@ public class View extends javax.swing.JFrame {
     private Object[][] convertProductListToData(List<String> dbList) {
 
         int productCount = dbList.size();
-        Object[][] data = new Object[productCount][7];
+        Object[][] data = new Object[productCount][8];
 
         for (int i = 0; i < productCount; i++) {
             String[] productData = dbList.get(i).split(" - ");
 
-            data[i][0] = productData.length > 2 ? productData[1] : "";
-            data[i][1] = productData.length > 5 ? productData[2] : "";
-            data[i][2] = productData.length > 4 ? productData[4] : "";
-            data[i][3] = productData.length > 3 ? productData[3] : "";
-            data[i][4] = productData.length > 3 ? productData[5] : "";
-            data[i][5] = "Configure";
-            data[i][6] = "Delete";
+            data[i][0] = productData.length > 1 ? productData[0] : "";
+            data[i][1] = productData.length > 2 ? productData[1] : "";
+            data[i][2] = productData.length > 5 ? productData[2] : "";
+            data[i][3] = productData.length > 4 ? productData[4] : "";
+            data[i][4] = productData.length > 3 ? productData[3] : "";
+            data[i][5] = productData.length > 3 ? productData[5] : "";
+            data[i][6] = "Configure";
+            data[i][7] = "Delete";
         }
         return data;
     }
@@ -179,8 +187,9 @@ public class View extends javax.swing.JFrame {
             String name = product[1];
             float price = Float.parseFloat(product[2]);
             String description = product[3];
+            String shelf = product[4];
 
-            EditFrame editFrame = new EditFrame(id, name, price, description);
+            EditFrame editFrame = new EditFrame(this, id, name, price, description, shelf);
             editFrame.setVisible(true);
             editFrame.setLocationRelativeTo(null);
         } else {
@@ -189,11 +198,23 @@ public class View extends javax.swing.JFrame {
             String description = product[1];
             String localization = product[2];
 
-            EditFrame editFrame = new EditFrame(id, description, localization);
+            EditFrame editFrame = new EditFrame(this, id, description, localization, "Entity", state);
             editFrame.setVisible(true);
             editFrame.setLocationRelativeTo(null);
         }
+    }
 
+    public void DeleteItem(int row) {
+        int id = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
+        if (state.equals("Products")) {
+            dao.deleteProduct(id);
+            System.out.println("Producto borrado: " + id);
+            Reload();
+        } else if (state.equals("Deposit")) {
+            dao.deleteDeposit(id);
+            System.out.println("Deposito borrado: " + id);
+            Reload();
+        }
     }
 
     /**
@@ -329,13 +350,10 @@ public class View extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(panelTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 852, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(panelTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 870, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 852, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(37, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -375,17 +393,13 @@ public class View extends javax.swing.JFrame {
     private void storageBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_storageBtnActionPerformed
         panelTitle.setText("- Storage List");
         state = "Deposit";
-        ClearTable();
-        LoadDepositTable();
-        //CARGAR LA LISTA DE CONTENEDORES
+        Reload();
     }//GEN-LAST:event_storageBtnActionPerformed
 
     private void productBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productBtnActionPerformed
         panelTitle.setText("- Product List");
         state = "Products";
-        ClearTable();
-        LoadProductTable();
-        //CARGAR LA LISTA DE PRODUCTOS
+        Reload();
     }//GEN-LAST:event_productBtnActionPerformed
 
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
@@ -393,7 +407,7 @@ public class View extends javax.swing.JFrame {
     }//GEN-LAST:event_exitBtnActionPerformed
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
-        EditFrame editFrame = new EditFrame("Entity");
+        EditFrame editFrame = new EditFrame(this, "Entity", state);
         editFrame.setVisible(true);
         editFrame.setLocationRelativeTo(null);
     }//GEN-LAST:event_addBtnActionPerformed

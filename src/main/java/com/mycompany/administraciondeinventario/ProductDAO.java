@@ -50,8 +50,8 @@ public class ProductDAO {
     }
 
     public String[] getProductByTable(int position) {
-        String[] productDetails = new String[4];
-        String sql = "SELECT cod_product, name, price, description FROM Products LIMIT 1 OFFSET ?";
+        String[] productDetails = new String[5];
+        String sql = "SELECT cod_product, name, price, description, shelf FROM Products LIMIT 1 OFFSET ?";
 
         try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
@@ -63,6 +63,7 @@ public class ProductDAO {
                     productDetails[1] = rs.getString("name");
                     productDetails[2] = rs.getString("price");
                     productDetails[3] = rs.getString("description");
+                    productDetails[4] = rs.getString("shelf");
                 }
             }
 
@@ -138,7 +139,8 @@ public class ProductDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                products.add(rs.getString("cod_product") + " - "
+                products.add(rs.getString("id_product") + " - "
+                        + rs.getString("cod_product") + " - "
                         + rs.getString("name") + " - "
                         + rs.getInt("quantity"));
             }
@@ -173,7 +175,7 @@ public class ProductDAO {
         }
         return deposits;
     }
-
+    
     public List<String> getChildComponents(int parentId) {
         List<String> childComponents = new ArrayList<>();
         String sql = "SELECT p.id_product, p.cod_product, p.name, p.description, p.shelf, p.price "
@@ -187,9 +189,10 @@ public class ProductDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                
-                String productDetails = 
-                        rs.getString("cod_product") + " - "
+
+                String productDetails
+                        = rs.getString("id_product") + " - "
+                        + rs.getString("cod_product") + " - "
                         + rs.getString("name");
                 childComponents.add(productDetails);
             }
@@ -212,7 +215,9 @@ public class ProductDAO {
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                String productDetails = rs.getString("cod_product")  
+                String productDetails
+                        = rs.getString("id_product") + " - "
+                        + rs.getString("cod_product")
                         + " - " + rs.getString("name");
                 parentComponents.add(productDetails);
             }
@@ -221,6 +226,8 @@ public class ProductDAO {
         }
         return parentComponents;
     }
+    
+    
 
     // UPDATE
     public void updateProducto(int idProd, String codProd, String name, String description, double price, String shelf) {
@@ -287,7 +294,7 @@ public class ProductDAO {
 
     //CREATE
     public void createProduct(String codProd, String name, String description, double price, String shelf) {
-        String sql = "INSERT INTO Products (cod_prod, name, description, price, shelf) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO Products (cod_product, name, description, price, shelf) VALUES (?, ?, ?, ?, ?)";
         try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, codProd);
             stmt.setString(2, name);
@@ -302,12 +309,11 @@ public class ProductDAO {
         }
     }
 
-    public void createDeposit(String name, String description, String loc) {
-        String sql = "INSERT INTO Deposit (name, description, localization) VALUES (?, ?)";
+    public void createDeposit(String description, String loc) {
+        String sql = "INSERT INTO Deposit (description, localization) VALUES (?, ?)";
         try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, name);
-            stmt.setString(2, description);
-            stmt.setString(3, loc);
+            stmt.setString(1, description);
+            stmt.setString(2, loc);
             stmt.executeUpdate();
             System.out.println("Depósito insertado correctamente.");
             ConnectionDB.CloseConnection(connection);
@@ -343,7 +349,7 @@ public class ProductDAO {
         }
     }
 
-    //DDELETE
+    //DELETE
     public void deleteProduct(int idProd) {
         String sql = "DELETE FROM Products WHERE id_product = ?";
         try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {

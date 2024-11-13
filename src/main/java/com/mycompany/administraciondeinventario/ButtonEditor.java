@@ -35,8 +35,7 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
                 if (label.equals("Configure")) {
                     v.openEditFrame(table.getSelectedRow());
                 } else if (label.equals("Delete")) {
-                    //Eliminar producto
-                    System.out.println("Producto Eliminado: " + table.getSelectedRow());
+                    v.DeleteItem(table.getSelectedRow());
                 }
             }
         });
@@ -55,7 +54,7 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
                 if (label.equals("Configure")) {
                     det.openEditFrame(table.getSelectedRow());
                 } else if (label.equals("Delete")) {
-                    System.out.println("Producto Eliminado: " + table.getSelectedRow());
+                    det.DeleteItem(table.getSelectedRow());
                 }
             }
         });

@@ -7,7 +7,6 @@ package com.mycompany.administraciondeinventario;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -21,12 +20,16 @@ public class DetailsFrame extends javax.swing.JFrame {
     private ProductDAO dao;
     private int row;
     private View v;
+    private int[] composedID;
 
-    public DetailsFrame(String state, int row, View v) {
+    public DetailsFrame(String state, int row, View v, String name, int id) {
         this.state = state;
         this.dao = new ProductDAO();
         this.row = row;
         this.v = v;
+        this.composedID = new int[2];
+        composedID[0] = id;
+
         //Look and Feel
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -44,7 +47,8 @@ public class DetailsFrame extends javax.swing.JFrame {
         //Other configs
         this.setResizable(false);
         this.setLocationRelativeTo(null);
-        DisplayTables();
+        v.setEnabled(false);
+        panelTitle.setText(name);
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -52,29 +56,63 @@ public class DetailsFrame extends javax.swing.JFrame {
                 OnDispose();
             }
         });
+
+        if (state.equals("Products")) {
+            jTabbedPane1.addChangeListener(e -> {
+                int selectedIndex = jTabbedPane1.getSelectedIndex();
+                switch (selectedIndex) {
+                    case 0:
+                        this.state = "Deposit";
+                        break;
+                    case 1:
+                        this.state = "Parent Products";
+                        break;
+                    case 2:
+                        this.state = "Child Products";
+                        break;
+                    default:
+                        this.state = "Products";
+                }
+            });
+        }
+        Reload();
+    }
+
+    public void Reload() {
+        ClearTables();
+        DisplayTables();
     }
 
     public void DisplayTables() {
-
         if (state.equals("Deposit")) {
-            LoadDepositTableForProduct(row + 1);
+            LoadProductsOfDeposit(row + 1);
             jTabbedPane1.remove(jPanel3);
             jTabbedPane1.remove(jPanel4);
         } else {
-            LoadProductTable(row + 1);
-            LoadParentComponentsForProduct(row + 1);
-            LoadChildComponentsForProduct(row + 1);
+            LoadDepositsOfProduct(row + 1);
+            LoadChildComponentsOfProduct(row + 1);
+            LoadParentComponentsOfProduct(row + 1);
         }
     }
 
-    public void ClearTable() {
+    public void ClearTables() {
         if (jTable1.getModel() instanceof DefaultTableModel) {
             DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
             model.setRowCount(0);
         }
+
+        if (jTable2.getModel() instanceof DefaultTableModel) {
+            DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+            model.setRowCount(0);
+        }
+
+        if (jTable3.getModel() instanceof DefaultTableModel) {
+            DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+            model.setRowCount(0);
+        }
     }
 
-    public void LoadProductTable(int id_product) {
+    public void LoadDepositsOfProduct(int id_product) {
 
         List<String> productos = dao.getDepositsOfProduct(id_product);
         Object[][] data = convertProductListToData(productos);
@@ -114,22 +152,24 @@ public class DetailsFrame extends javax.swing.JFrame {
         return data;
     }
 
-    public void LoadDepositTableForProduct(int id_deposit) {
+    public void LoadProductsOfDeposit(int id_deposit) {
 
         List<String> depositos = dao.getProductsInDeposit(id_deposit);
 
         Object[][] data = convertDepositListToData(depositos);
 
-        String[] columnNames = {"Id", "Name", "Stock", "Configuration", "Delete"};
+        String[] columnNames = {"hidden", "Id", "Name", "Stock", "Configuration", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 3 || column == 4;
+                return column == 4 || column == 5;
             }
         };
 
         jTable1.setModel(tableModel);
+
+        jTable1.getColumnModel().removeColumn(jTable1.getColumnModel().getColumn(0));
 
         // Botón de configuración
         jTable1.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
@@ -145,35 +185,37 @@ public class DetailsFrame extends javax.swing.JFrame {
     }
 
     private Object[][] convertDepositListToData(List<String> depositos) {
-        Object[][] data = new Object[depositos.size()][5];
+        Object[][] data = new Object[depositos.size()][6];
 
         for (int i = 0; i < depositos.size(); i++) {
             String[] depositoDetails = depositos.get(i).split(" - ");
             for (int j = 0; j < depositoDetails.length; j++) {
                 data[i][j] = depositoDetails[j];
             }
-            data[i][3] = "Configure";  // Columna de configuración
-            data[i][4] = "Delete";    // Columna de eliminar
+            data[i][4] = "Configure";
+            data[i][5] = "Delete";
         }
         return data;
     }
 
-    public void LoadChildComponentsForProduct(int id_prod_parent) {
+    public void LoadChildComponentsOfProduct(int id_prod_parent) {
 
         List<String> childComponents = dao.getChildComponents(id_prod_parent);
 
         Object[][] data = convertComponentListToData(childComponents);
 
-        String[] columnNames = {"Id", "Name", "Delete"};
+        String[] columnNames = {"hidden", "Id", "Name", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 2;
+                return column == 3;
             }
         };
 
         jTable3.setModel(tableModel);
+
+        jTable3.getColumnModel().removeColumn(jTable3.getColumnModel().getColumn(0));
 
         jTable3.getColumnModel().getColumn(2).setCellRenderer(new ButtonRenderer());
         jTable3.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor(jTable3, this));
@@ -182,22 +224,24 @@ public class DetailsFrame extends javax.swing.JFrame {
         jTable3.setSelectionForeground(jTable3.getForeground());
     }
 
-    public void LoadParentComponentsForProduct(int id_prod_child) {
+    public void LoadParentComponentsOfProduct(int id_prod_child) {
 
         List<String> parentComponents = dao.getParentComponents(id_prod_child);
 
         Object[][] data = convertComponentListToData(parentComponents);
 
-        String[] columnNames = {"Id", "Name", "Delete"};
+        String[] columnNames = {"hidden", "Id", "Name", "Delete"};
 
         tableModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 2;
+                return column == 3;
             }
         };
 
         jTable2.setModel(tableModel);
+
+        jTable2.getColumnModel().removeColumn(jTable2.getColumnModel().getColumn(0));
 
         jTable2.getColumnModel().getColumn(2).setCellRenderer(new ButtonRenderer());
         jTable2.getColumnModel().getColumn(2).setCellEditor(new ButtonEditor(jTable2, this));
@@ -207,29 +251,68 @@ public class DetailsFrame extends javax.swing.JFrame {
     }
 
     private Object[][] convertComponentListToData(List<String> components) {
-        Object[][] data = new Object[components.size()][3];
+        Object[][] data = new Object[components.size()][4];
 
         for (int i = 0; i < components.size(); i++) {
 
             String[] componentDetails = components.get(i).split(" - ");
 
             data[i][0] = componentDetails.length > 0 ? componentDetails[0] : "";
-            data[i][1] = componentDetails.length > 1 ? componentDetails[1] : "";
-            data[i][2] = "Delete";
+            data[i][1] = componentDetails.length > 0 ? componentDetails[1] : "";
+            data[i][2] = componentDetails.length > 1 ? componentDetails[2] : "";
+            data[i][3] = "Delete";
         }
         return data;
     }
 
     public void OnDispose() {
-        v.state = "Relation";
+        v.setEnabled(true);
     }
 
-    public void openEditFrame(int id) {
+    public void openEditFrame(int row) {
+        //ID = [0]: Child | Deposit    -   [1]: Parent |Product
+        composedID[1] = (int) jTable1.getModel().getValueAt(row, 0);
 
-        EditFrame editFrame = new EditFrame(id, 4);
-        editFrame.setVisible(true);
-        editFrame.setLocationRelativeTo(null);
+        if (state.equals("Deposit")) {
+            int id = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
+            int stock = Integer.parseInt(jTable1.getModel().getValueAt(row, 3).toString());
+            System.out.println(stock);
+            EditFrame editFrame = new EditFrame(this, id, "Relation", state, stock);
+            editFrame.setVisible(true);
+            editFrame.setLocationRelativeTo(null);
+        }
+    }
 
+    public void DeleteItem(int row) {
+
+        switch (state) {
+
+            case "Products":
+                composedID[1] = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
+                dao.deleteStored(composedID[1], composedID[0]);
+                break;
+
+            case "Deposit":
+                composedID[1] = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
+                dao.deleteStored(composedID[0], composedID[1]);
+                break;
+
+            case "Parent Products":
+                composedID[1] = Integer.parseInt(jTable2.getModel().getValueAt(row, 0).toString());
+                dao.deleteCompone(composedID[1], composedID[0]);
+                break;
+
+            case "Child Products":
+                composedID[1] = Integer.parseInt(jTable3.getModel().getValueAt(row, 0).toString());
+                dao.deleteCompone(composedID[0], composedID[1]);
+                break;
+
+            default:
+                throw new AssertionError();
+        }
+
+        ClearTables();
+        DisplayTables();
     }
 
     /**
@@ -449,7 +532,7 @@ public class DetailsFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtn1ActionPerformed
-        EditFrame editFrame = new EditFrame("Relation");
+        EditFrame editFrame = new EditFrame(this, composedID[0], "Relation", state);
         editFrame.setVisible(true);
         editFrame.setLocationRelativeTo(null);
     }//GEN-LAST:event_addBtn1ActionPerformed
