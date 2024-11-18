@@ -26,6 +26,9 @@ public class EditFrame extends javax.swing.JFrame {
     private boolean isEditing;
     private int stock;
     private int[] composedID;
+    private boolean valid = false;
+    private int TestsPass = 0;
+    private int tests = 5;
 
     private Map<String, Integer> productMap;
     private List<String> items;
@@ -212,6 +215,96 @@ public class EditFrame extends javax.swing.JFrame {
                 }
             }
         }
+    }
+    
+    public boolean ErrorHandler() {
+        
+        if (consult.equals("Entity")) {
+            if (state.equals("Deposit")) {
+                
+                if (nameField.getText().length() == 0) {
+                    errorName.setText("The description cannot be blank");
+                } else if (nameField.getText().length() > 50) {
+                    errorName.setText("The description is too long (50+)");
+                } else {
+                    TestsPass += 1;
+                    errorName.setText("");
+                }
+    
+                if (priceField.getText().length() == 0) {
+                    errorPrice.setText("The localization cannot be blank");
+                } else if (priceField.getText().length() > 25) {
+                    errorPrice.setText("The localization is too long (25+)");
+                } else {
+                    TestsPass += 1;
+                    errorPrice.setText("");
+                }
+            } else {
+                if (idField.getText().matches("^[A-Z]{2}\\d{2}$")) {
+                    TestsPass += 1;
+                    errorId.setText("");
+                } else {
+                    errorId.setText("The ID format is not adecuate (AA00)");
+                }
+
+                if (nameField.getText().length() == 0) {
+                    errorName.setText("The name cannot be blank");
+                } else if (nameField.getText().length() > 25) {
+                    errorName.setText("The name is too long (25+)");
+                } else {
+                    TestsPass += 1;
+                    errorName.setText("");
+                }
+
+                if (priceField.getText().length() == 0) {
+                    errorPrice.setText("The price cannot be blank");
+                } else if (priceField.getText().length() > 25) {
+                    errorPrice.setText("The price is too long(25+)");
+                } else if (priceField.getText().matches("^\\d+(\\.\\d+)?$")) {
+                    errorPrice.setText("");
+                    TestsPass += 1;
+                } else {
+                    errorPrice.setText("The price format is not adecuate (decimal)");
+                }
+
+                if (descriptionField.getText().length() == 0) {
+                    errorDescription.setText("The description cannot be blank");
+                } else if (descriptionField.getText().length() > 50) {
+                    errorDescription.setText("The description is too long(50+)");
+                } else {
+                    errorDescription.setText("");
+                    TestsPass += 1;
+                }
+
+                if (shelfField.getText().matches("^[A-Z]{1}\\d{1}$")) {
+                    errorShelf.setText("");
+                    TestsPass += 1;
+                } else {
+                    errorShelf.setText("The shelf format is not adecuate (A0)");
+                }
+            }
+        } else {
+
+            if (state.equals("Products")) {
+                if (priceField.getText().length() == 0) {
+                    errorPrice.setText("The stock cannot be 0");
+                } else if (priceField.getText().length() > 7) {
+                    errorPrice.setText("The stock is too long(7)");
+                } else if (priceField.getText().matches("^[0-9]+$")) {
+                    errorPrice.setText("");
+                    TestsPass += 1;
+                } else {
+                    errorPrice.setText("The stock format is not adecuate (decimal)");
+                }
+            }
+        }
+        
+        if (TestsPass == tests) {
+            valid = true;
+            this.dispose();
+        }
+        
+        return valid;
     }
 
     /**
@@ -467,71 +560,75 @@ public class EditFrame extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 
-        if (isUpdate == true) {
-            if (consult.equals("Entity")) {
-                if (state.equals("Deposit")) {
-                    //UPDATE DEPOSIT
-                    dao.updateDeposit(id, nameField.getText(), priceField.getText());
+        ErrorHandler();
+        
+        if (valid) {
+            if (isUpdate == true) {
+                if (consult.equals("Entity")) {
+                    if (state.equals("Deposit")) {
+                        //UPDATE DEPOSIT
+                        dao.updateDeposit(id, nameField.getText(), priceField.getText());
+                    } else {
+                        //UPDATE PRODUCT
+                        dao.updateProduct(id, idField.getText(), nameField.getText(), descriptionField.getText(), Double.parseDouble(priceField.getText()), shelfField.getText());
+                    }
+                    v.Reload();
                 } else {
-                    //UPDATE PRODUCT
-                    dao.updateProduct(id, idField.getText(), nameField.getText(), descriptionField.getText(), Double.parseDouble(priceField.getText()), shelfField.getText());
+                    if (state.equals("Deposit")) {
+                        //UPDATE PRODUCT IN DEPOSIT
+                        dao.updateStored(composedID[0], composedID[1], Integer.parseInt(priceField.getText()));
+                    }
+                    det.Reload();
                 }
-                v.Reload();
             } else {
-                if (state.equals("Deposit")) {
-                    //UPDATE PRODUCT IN DEPOSIT
-                    dao.updateStored(composedID[0], composedID[1], Integer.parseInt(priceField.getText()));
-                }
-                det.Reload();
-            }
-        } else {
 
-            if (consult.equals("Entity")) {
-                if (state.equals("Deposit")) {
-                    //ADD DEPOSIT
-                    dao.createDeposit(nameField.getText(), priceField.getText());
+                if (consult.equals("Entity")) {
+                    if (state.equals("Deposit")) {
+                        //ADD DEPOSIT
+                        dao.createDeposit(nameField.getText(), priceField.getText());
+                    } else {
+                        //ADD PRODUCT
+                        dao.createProduct(idField.getText(), nameField.getText(), descriptionField.getText(), Double.parseDouble(priceField.getText()), shelfField.getText());
+                    }
+                    v.Reload();
                 } else {
-                    //ADD PRODUCT
-                    dao.createProduct(idField.getText(), nameField.getText(), descriptionField.getText(), Double.parseDouble(priceField.getText()), shelfField.getText());
-                }
-                v.Reload();
-            } else {
-                if (state.equals("Deposit")) {
-                    //ADD PRODUCT IN DEPOSIT
-                    int productId = productMap.get(jComboBox1.getSelectedItem().toString());
-                    if (!dao.isProductInDeposit(id, productId)) {
-                        dao.createStored(id, productId, Integer.parseInt(priceField.getText()));
-                    } else {
-                        System.out.println("El producto ya existe en el depósito.");
-                    }
-                } else if (state.equals("Products")) {
-                    //ADD DEPOSIT IN PRODUCT 
-                    int depositId = productMap.get(jComboBox1.getSelectedItem().toString());
-                    if (!dao.isDepositInProduct(id, depositId)) {
-                        dao.createStored(depositId, id, Integer.parseInt(priceField.getText()));
-                    } else {
-                        System.out.println("El depósito ya está asociado al producto.");
-                    }
+                    if (state.equals("Deposit")) {
+                        //ADD PRODUCT IN DEPOSIT
+                        int productId = productMap.get(jComboBox1.getSelectedItem().toString());
+                        if (!dao.isProductInDeposit(id, productId)) {
+                            dao.createStored(id, productId, Integer.parseInt(priceField.getText()));
+                        } else {
+                            System.out.println("El producto ya existe en el depósito.");
+                        }
+                    } else if (state.equals("Products")) {
+                        //ADD DEPOSIT IN PRODUCT 
+                        int depositId = productMap.get(jComboBox1.getSelectedItem().toString());
+                        if (!dao.isDepositInProduct(id, depositId)) {
+                            dao.createStored(depositId, id, Integer.parseInt(priceField.getText()));
+                        } else {
+                            System.out.println("El depósito ya está asociado al producto.");
+                        }
 
-                } else if (state.equals("Parent Products")) {
-                    //ADD PARENT PRODUCT
-                    int productId = productMap.get(jComboBox1.getSelectedItem().toString());
-                    if (!dao.isParentComponentExists(productId, id)) {
-                        dao.createComponent(productId, id);
-                    } else {
-                        System.out.println("El producto padre ya está asociado a este producto hijo.");
-                    }
+                    } else if (state.equals("Parent Products")) {
+                        //ADD PARENT PRODUCT
+                        int productId = productMap.get(jComboBox1.getSelectedItem().toString());
+                        if (!dao.isParentComponentExists(productId, id)) {
+                            dao.createComponent(productId, id);
+                        } else {
+                            System.out.println("El producto padre ya está asociado a este producto hijo.");
+                        }
 
-                } else {
-                    //ADD CHILD PRODUCT
-                    int productId = productMap.get(jComboBox1.getSelectedItem().toString());
-                    if (!dao.isParentComponentExists(id, productId)) {
-                        dao.createComponent(id, productId);
                     } else {
-                        System.out.println("El producto hijo ya está asociado al producto padre.");
+                        //ADD CHILD PRODUCT
+                        int productId = productMap.get(jComboBox1.getSelectedItem().toString());
+                        if (!dao.isParentComponentExists(id, productId)) {
+                            dao.createComponent(id, productId);
+                        } else {
+                            System.out.println("El producto hijo ya está asociado al producto padre.");
+                        }
                     }
+                    det.Reload();
                 }
-                det.Reload();
             }
         }
         this.dispose();
