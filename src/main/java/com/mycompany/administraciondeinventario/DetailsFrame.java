@@ -272,14 +272,10 @@ public class DetailsFrame extends javax.swing.JFrame {
     public void openEditFrame(int row) {
         //ID = [0]: Child | Deposit    -   [1]: Parent |Product
 
-        Object cellValue = jTable1.getModel().getValueAt(row, 0);
-        composedID[1] = Integer.parseInt((String) cellValue);
-
         if (state.equals("Deposit")) {
-            int id = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
+            composedID[1] = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
             int stock = Integer.parseInt(jTable1.getModel().getValueAt(row, 3).toString());
-            
-            EditFrame editFrame = new EditFrame(this, id, "Relation", state, stock);
+            EditFrame editFrame = new EditFrame(this, composedID, "Relation", state, stock);
             editFrame.setVisible(true);
             editFrame.setLocationRelativeTo(null);
         }

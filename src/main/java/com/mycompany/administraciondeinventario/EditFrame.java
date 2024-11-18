@@ -24,8 +24,11 @@ public class EditFrame extends javax.swing.JFrame {
     private String state;
     private String shelf;
     private int stock;
+    private int[] composedID;
+
     private Map<String, Integer> productMap;
     private List<String> items;
+
     private DetailsFrame det;
     private View v;
     private boolean isUpdate = false;
@@ -51,9 +54,9 @@ public class EditFrame extends javax.swing.JFrame {
     }
 
     //EDIT RELATION STORED
-    public EditFrame(DetailsFrame det, int id, String consult, String state, int stock) {
+    public EditFrame(DetailsFrame det, int[] composedID, String consult, String state, int stock) {
         this.det = det;
-        this.id = id;
+        this.composedID = composedID;
         this.consult = consult;
         this.state = state;
         this.stock = stock;
@@ -75,8 +78,9 @@ public class EditFrame extends javax.swing.JFrame {
     }
 
     //EDIT PRODUCT
-    public EditFrame(View v, String code, String name, float price, String description, String shelf) {
+    public EditFrame(View v, int id, String code, String name, float price, String description, String shelf) {
         this.v = v;
+        this.id = id;
         this.code = code;
         this.name = name;
         this.price = price;
@@ -115,6 +119,8 @@ public class EditFrame extends javax.swing.JFrame {
         } else {
             if (state.equals("Deposit")) {
                 priceLabel.setText("Stock");
+                comboBoxLabel.setVisible(false);
+                jComboBox1.setVisible(false);
             } else if (state.equals("Products")) {
                 priceLabel.setText("Stock");
                 comboBoxLabel.setText("Deposit");
@@ -449,20 +455,17 @@ public class EditFrame extends javax.swing.JFrame {
         if (isUpdate == true) {
             if (consult.equals("Entity")) {
                 if (state.equals("Deposit")) {
-                    //UPDATE DEPOSIT 
+                    //UPDATE DEPOSIT
+                    dao.updateDeposit(id, nameField.getText(), priceField.getText());
                 } else {
                     //UPDATE PRODUCT
-                }       
+                    dao.updateProduct(id, idField.getText(), nameField.getText(), descriptionField.getText(), Double.parseDouble(priceField.getText()), shelfField.getText());
+                }
                 v.Reload();
             } else {
                 if (state.equals("Deposit")) {
-                    //UPDATE PRODUCT IN DEPOSIT       
-                } else if (state.equals("Products")) {
-                    //UPDATE DEPOSIT IN PRODUCT 
-                } else if (state.equals("Parent Products")) {
-                    //UPDATE PARENT PRODUCT
-                } else {
-                    //UPDATE CHILD PRODUCT
+                    //UPDATE PRODUCT IN DEPOSIT
+                    dao.updateStored(composedID[0], composedID[1], Integer.parseInt(priceField.getText()));
                 }
                 det.Reload();
             }

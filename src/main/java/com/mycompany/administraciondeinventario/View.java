@@ -183,13 +183,15 @@ public class View extends javax.swing.JFrame {
     public void openEditFrame(int row) {
         if (state.equals("Products")) {
             String[] product = dao.getProductByTable(row);
-            String id = product[0];
-            String name = product[1];
-            float price = Float.parseFloat(product[2]);
-            String description = product[3];
-            String shelf = product[4];
+            int id = Integer.parseInt(product[0]);
+            System.out.println(id);
+            String code = product[1];
+            String name = product[2];
+            float price = Float.parseFloat(product[3]);
+            String description = product[4];
+            String shelf = product[5];
 
-            EditFrame editFrame = new EditFrame(this, id, name, price, description, shelf);
+            EditFrame editFrame = new EditFrame(this, id, code, name, price, description, shelf);
             editFrame.setVisible(true);
             editFrame.setLocationRelativeTo(null);
         } else {

@@ -50,8 +50,8 @@ public class ProductDAO {
     }
 
     public String[] getProductByTable(int position) {
-        String[] productDetails = new String[5];
-        String sql = "SELECT cod_product, name, price, description, shelf FROM Products LIMIT 1 OFFSET ?";
+        String[] productDetails = new String[6];
+        String sql = "SELECT id_product, cod_product, name, price, description, shelf FROM Products LIMIT 1 OFFSET ?";
 
         try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
@@ -59,11 +59,12 @@ public class ProductDAO {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    productDetails[0] = rs.getString("cod_product");
-                    productDetails[1] = rs.getString("name");
-                    productDetails[2] = rs.getString("price");
-                    productDetails[3] = rs.getString("description");
-                    productDetails[4] = rs.getString("shelf");
+                    productDetails[0] = rs.getString("id_product");
+                    productDetails[1] = rs.getString("cod_product");
+                    productDetails[2] = rs.getString("name");
+                    productDetails[3] = rs.getString("price");
+                    productDetails[4] = rs.getString("description");
+                    productDetails[5] = rs.getString("shelf");
                 }
             }
 
@@ -230,7 +231,7 @@ public class ProductDAO {
     
 
     // UPDATE
-    public void updateProducto(int idProd, String codProd, String name, String description, double price, String shelf) {
+    public void updateProduct(int idProd, String codProd, String name, String description, double price, String shelf) {
         String sql = "UPDATE Products SET cod_product = ?, name = ?, description = ?, price = ?, shelf = ? WHERE id_product = ?";
         try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, codProd);
@@ -246,13 +247,12 @@ public class ProductDAO {
         }
     }
 
-    public void updateDeposit(int idDep, String name, String description, String loc) {
-        String sql = "UPDATE Deposit SET name = ?, description = ?, localization = ? WHERE id_product = ?";
+    public void updateDeposit(int idDep, String description, String loc) {
+        String sql = "UPDATE Deposit SET description = ?, localization = ? WHERE id_deposit = ?";
         try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, name);
-            stmt.setString(2, description);
-            stmt.setString(3, loc);
-            stmt.setInt(4, idDep);
+            stmt.setString(1, description);
+            stmt.setString(2, loc);
+            stmt.setInt(3, idDep);
             stmt.executeUpdate();
             ConnectionDB.CloseConnection(connection);
         } catch (SQLException e) {
@@ -267,25 +267,6 @@ public class ProductDAO {
             stmt.setInt(2, idDep);
             stmt.setInt(3, idProd);
             stmt.executeUpdate();
-            ConnectionDB.CloseConnection(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void updateCompone(int parentProdId, int childProdId, int newParentProdId, int newChildProdId) {
-        String deleteSql = "DELETE FROM Components WHERE id_prod_parent = ? AND id_prod_child = ?";
-        String insertSql = "INSERT INTO Components (id_prod_parent, id_prod_child) VALUES (?, ?)";
-
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement deleteStmt = connection.prepareStatement(deleteSql); PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
-
-            deleteStmt.setInt(1, parentProdId);
-            deleteStmt.setInt(2, childProdId);
-            deleteStmt.executeUpdate();
-
-            insertStmt.setInt(1, newParentProdId);
-            insertStmt.setInt(2, newChildProdId);
-            insertStmt.executeUpdate();
             ConnectionDB.CloseConnection(connection);
         } catch (SQLException e) {
             e.printStackTrace();
