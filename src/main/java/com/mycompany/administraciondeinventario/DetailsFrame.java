@@ -62,7 +62,7 @@ public class DetailsFrame extends javax.swing.JFrame {
                 int selectedIndex = jTabbedPane1.getSelectedIndex();
                 switch (selectedIndex) {
                     case 0:
-                        this.state = "Deposit";
+                        this.state = "Products";
                         break;
                     case 1:
                         this.state = "Parent Products";
@@ -71,7 +71,7 @@ public class DetailsFrame extends javax.swing.JFrame {
                         this.state = "Child Products";
                         break;
                     default:
-                        this.state = "Products";
+                        this.state = "Deposit";
                 }
             });
         }
@@ -271,12 +271,14 @@ public class DetailsFrame extends javax.swing.JFrame {
 
     public void openEditFrame(int row) {
         //ID = [0]: Child | Deposit    -   [1]: Parent |Product
-        composedID[1] = (int) jTable1.getModel().getValueAt(row, 0);
+
+        Object cellValue = jTable1.getModel().getValueAt(row, 0);
+        composedID[1] = Integer.parseInt((String) cellValue);
 
         if (state.equals("Deposit")) {
             int id = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
             int stock = Integer.parseInt(jTable1.getModel().getValueAt(row, 3).toString());
-            System.out.println(stock);
+            
             EditFrame editFrame = new EditFrame(this, id, "Relation", state, stock);
             editFrame.setVisible(true);
             editFrame.setLocationRelativeTo(null);

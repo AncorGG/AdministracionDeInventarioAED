@@ -47,6 +47,7 @@ public class EditFrame extends javax.swing.JFrame {
         this.consult = consult;
         this.state = state;
         OnStart();
+        System.out.println(state);
     }
 
     //EDIT RELATION STORED
@@ -56,6 +57,7 @@ public class EditFrame extends javax.swing.JFrame {
         this.consult = consult;
         this.state = state;
         this.stock = stock;
+
         OnStart();
         getData();
     }
