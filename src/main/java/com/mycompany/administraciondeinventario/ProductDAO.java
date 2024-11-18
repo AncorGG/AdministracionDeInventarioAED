@@ -153,6 +153,21 @@ public class ProductDAO {
         return products;
     }
 
+    public boolean isProductInDeposit(int id_deposit, int id_product) {
+        String sql = "SELECT COUNT(*) AS count FROM Stored WHERE id_deposit = ? AND id_product = ?";
+        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, id_deposit);
+            pstmt.setInt(2, id_product);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count") > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public List<String> getDepositsOfProduct(int id_product) {
         List<String> deposits = new ArrayList<>();
         String sql = "SELECT d.id_deposit, d.description, d.localization "
@@ -177,6 +192,22 @@ public class ProductDAO {
         return deposits;
     }
     
+    
+    public boolean isDepositInProduct(int id_product, int id_deposit) {
+        String sql = "SELECT COUNT(*) AS count FROM Stored WHERE id_product = ? AND id_deposit = ?";
+        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, id_product);
+            pstmt.setInt(2, id_deposit);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count") > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public List<String> getChildComponents(int parentId) {
         List<String> childComponents = new ArrayList<>();
         String sql = "SELECT p.id_product, p.cod_product, p.name, p.description, p.shelf, p.price "
@@ -203,6 +234,7 @@ public class ProductDAO {
         return childComponents;
     }
 
+
     public List<String> getParentComponents(int childId) {
         List<String> parentComponents = new ArrayList<>();
         String sql = "SELECT p.id_product, p.cod_product, p.name, p.description, p.shelf, p.price "
@@ -228,7 +260,21 @@ public class ProductDAO {
         return parentComponents;
     }
     
-    
+    public boolean isParentComponentExists(int parentId, int childId) {
+    String sql = "SELECT COUNT(*) AS count FROM Components WHERE id_prod_parent = ? AND id_prod_child = ?";
+    try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        pstmt.setInt(1, parentId);
+        pstmt.setInt(2, childId);
+        ResultSet rs = pstmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt("count") > 0;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false;
+}
+
 
     // UPDATE
     public void updateProduct(int idProd, String codProd, String name, String description, double price, String shelf) {

@@ -23,6 +23,7 @@ public class EditFrame extends javax.swing.JFrame {
     private String localization;
     private String state;
     private String shelf;
+    private boolean isEditing;
     private int stock;
     private int[] composedID;
 
@@ -49,6 +50,7 @@ public class EditFrame extends javax.swing.JFrame {
         this.id = id;
         this.consult = consult;
         this.state = state;
+        this.isEditing = false;
         OnStart();
         System.out.println(state);
     }
@@ -60,6 +62,7 @@ public class EditFrame extends javax.swing.JFrame {
         this.consult = consult;
         this.state = state;
         this.stock = stock;
+        this.isEditing = true;
 
         OnStart();
         getData();
@@ -119,8 +122,10 @@ public class EditFrame extends javax.swing.JFrame {
         } else {
             if (state.equals("Deposit")) {
                 priceLabel.setText("Stock");
-                comboBoxLabel.setVisible(false);
-                jComboBox1.setVisible(false);
+                if (isEditing) {
+                    comboBoxLabel.setVisible(false);
+                    jComboBox1.setVisible(false);
+                }
             } else if (state.equals("Products")) {
                 priceLabel.setText("Stock");
                 comboBoxLabel.setText("Deposit");
@@ -179,22 +184,32 @@ public class EditFrame extends javax.swing.JFrame {
 
     public void ComboBoxRead() {
         productMap = new HashMap<>();
+        int idToExclude;
         if (state.equals("Products")) {
             items = dao.getDeposits();
+            idToExclude = -1;
+        } else if (state.equals("Deposit")) {
+            items = dao.getProducts();
+            idToExclude = -1;
         } else {
             items = dao.getProducts();
+            idToExclude = id;
         }
-
         jComboBox1.removeAllItems();
-
         for (String item : items) {
             String[] parts = item.split(" - ");
             if (parts.length > 2) {
                 int productId = Integer.parseInt(parts[0].trim());
-                String productName = parts[2].trim();
-
-                productMap.put(productName, productId);
-                jComboBox1.addItem(productName);
+                String productName;
+                if (state.equals("Products")) {
+                    productName = parts[1].trim();
+                } else {
+                    productName = parts[2].trim();
+                }
+                if (productId != idToExclude) {
+                    productMap.put(productName, productId);
+                    jComboBox1.addItem(productName);
+                }
             }
         }
     }
@@ -484,22 +499,37 @@ public class EditFrame extends javax.swing.JFrame {
                 if (state.equals("Deposit")) {
                     //ADD PRODUCT IN DEPOSIT
                     int productId = productMap.get(jComboBox1.getSelectedItem().toString());
-                    dao.createStored(id, productId, Integer.parseInt(priceField.getText()));
-
+                    if (!dao.isProductInDeposit(id, productId)) {
+                        dao.createStored(id, productId, Integer.parseInt(priceField.getText()));
+                    } else {
+                        System.out.println("El producto ya existe en el depósito.");
+                    }
                 } else if (state.equals("Products")) {
                     //ADD DEPOSIT IN PRODUCT 
                     int depositId = productMap.get(jComboBox1.getSelectedItem().toString());
-                    dao.createStored(depositId, id, Integer.parseInt(priceField.getText()));
+                    if (!dao.isDepositInProduct(id, depositId)) {
+                        dao.createStored(depositId, id, Integer.parseInt(priceField.getText()));
+                    } else {
+                        System.out.println("El depósito ya está asociado al producto.");
+                    }
 
                 } else if (state.equals("Parent Products")) {
                     //ADD PARENT PRODUCT
                     int productId = productMap.get(jComboBox1.getSelectedItem().toString());
-                    dao.createComponent(productId, id);
+                    if (!dao.isParentComponentExists(productId, id)) {
+                        dao.createComponent(productId, id);
+                    } else {
+                        System.out.println("El producto padre ya está asociado a este producto hijo.");
+                    }
 
                 } else {
                     //ADD CHILD PRODUCT
                     int productId = productMap.get(jComboBox1.getSelectedItem().toString());
-                    dao.createComponent(id, productId);
+                    if (!dao.isParentComponentExists(id, productId)) {
+                        dao.createComponent(id, productId);
+                    } else {
+                        System.out.println("El producto hijo ya está asociado al producto padre.");
+                    }
                 }
                 det.Reload();
             }
