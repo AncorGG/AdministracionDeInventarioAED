@@ -184,7 +184,6 @@ public class View extends javax.swing.JFrame {
         if (state.equals("Products")) {
             String[] product = dao.getProductByTable(row);
             int id = Integer.parseInt(product[0]);
-            System.out.println(id);
             String code = product[1];
             String name = product[2];
             float price = Float.parseFloat(product[3]);
@@ -210,11 +209,9 @@ public class View extends javax.swing.JFrame {
         int id = Integer.parseInt(jTable1.getModel().getValueAt(row, 0).toString());
         if (state.equals("Products")) {
             dao.deleteProduct(id);
-            System.out.println("Producto borrado: " + id);
             Reload();
         } else if (state.equals("Deposit")) {
             dao.deleteDeposit(id);
-            System.out.println("Deposito borrado: " + id);
             Reload();
         }
     }

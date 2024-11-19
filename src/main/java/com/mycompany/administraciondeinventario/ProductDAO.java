@@ -329,7 +329,6 @@ public class ProductDAO {
             stmt.setDouble(4, price);
             stmt.setString(5, shelf);
             stmt.executeUpdate();
-            System.out.println("Producto insertado correctamente.");
             ConnectionDB.CloseConnection(connection);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -342,7 +341,6 @@ public class ProductDAO {
             stmt.setString(1, description);
             stmt.setString(2, loc);
             stmt.executeUpdate();
-            System.out.println("Depósito insertado correctamente.");
             ConnectionDB.CloseConnection(connection);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -356,7 +354,6 @@ public class ProductDAO {
             stmt.setInt(2, idProd);
             stmt.setInt(3, quantity);
             stmt.executeUpdate();
-            System.out.println("Registro de almacenaje insertado correctamente.");
             ConnectionDB.CloseConnection(connection);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -369,7 +366,6 @@ public class ProductDAO {
             stmt.setInt(1, parentProdId);
             stmt.setInt(2, childProdId);
             stmt.executeUpdate();
-            System.out.println("Relación de composición insertada correctamente.");
             ConnectionDB.CloseConnection(connection);
         } catch (SQLException e) {
             e.printStackTrace();

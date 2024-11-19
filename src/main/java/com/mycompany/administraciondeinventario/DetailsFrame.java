@@ -17,29 +17,30 @@ public class DetailsFrame extends javax.swing.JFrame {
 
     private DefaultTableModel tableModel;
     private String state;
-    private ProductDAO dao;
+    private ProductDAO dao = new ProductDAO();
     private int row;
     private View v;
-    private int[] composedID;
+    private int[] composedID = new int[2];
+
+    ;
 
     public DetailsFrame(String state, int row, View v, String name, int id) {
         this.state = state;
-        this.dao = new ProductDAO();
         this.row = row;
         this.v = v;
-        this.composedID = new int[2];
         composedID[0] = id;
 
         //Look and Feel
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            for (var info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(View.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(View.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         }
 
         initComponents();
@@ -59,19 +60,11 @@ public class DetailsFrame extends javax.swing.JFrame {
 
         if (state.equals("Products")) {
             jTabbedPane1.addChangeListener(e -> {
-                int selectedIndex = jTabbedPane1.getSelectedIndex();
-                switch (selectedIndex) {
-                    case 0:
-                        this.state = "Products";
-                        break;
-                    case 1:
-                        this.state = "Parent Products";
-                        break;
-                    case 2:
-                        this.state = "Child Products";
-                        break;
-                    default:
-                        this.state = "Deposit";
+                switch (jTabbedPane1.getSelectedIndex()) {
+                    case 0 -> this.state = "Products";
+                    case 1 -> this.state = "Parent Products";
+                    case 2 -> this.state = "Child Products";
+                    default -> this.state = "Deposit";
                 }
             });
         }
@@ -85,13 +78,13 @@ public class DetailsFrame extends javax.swing.JFrame {
 
     public void DisplayTables() {
         if (state.equals("Deposit")) {
-            LoadProductsOfDeposit(row + 1);
+            LoadProductsOfDeposit(composedID[0]);
             jTabbedPane1.remove(jPanel3);
             jTabbedPane1.remove(jPanel4);
         } else {
-            LoadDepositsOfProduct(row + 1);
-            LoadChildComponentsOfProduct(row + 1);
-            LoadParentComponentsOfProduct(row + 1);
+            LoadDepositsOfProduct(composedID[0]);
+            LoadChildComponentsOfProduct(composedID[0]);
+            LoadParentComponentsOfProduct(composedID[0]);
         }
     }
 
@@ -171,11 +164,9 @@ public class DetailsFrame extends javax.swing.JFrame {
 
         jTable1.getColumnModel().removeColumn(jTable1.getColumnModel().getColumn(0));
 
-        // Botón de configuración
         jTable1.getColumnModel().getColumn(3).setCellRenderer(new ButtonRenderer());
         jTable1.getColumnModel().getColumn(3).setCellEditor(new ButtonEditor(jTable1, this));
 
-        // Botón de eliminar
         jTable1.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
         jTable1.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(jTable1, this));
 

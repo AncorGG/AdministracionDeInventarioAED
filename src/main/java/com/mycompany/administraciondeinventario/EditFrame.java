@@ -26,9 +26,8 @@ public class EditFrame extends javax.swing.JFrame {
     private boolean isEditing;
     private int stock;
     private int[] composedID;
-    private boolean valid = false;
-    private int TestsPass = 0;
-    private int tests = 5;
+    private int testsPass;
+    private int tests;
 
     private Map<String, Integer> productMap;
     private List<String> items;
@@ -118,6 +117,7 @@ public class EditFrame extends javax.swing.JFrame {
                 shelfLabel.setVisible(false);
                 nameLabel.setText("Description");
                 priceLabel.setText("Localization");
+
             }
             jComboBox1.setVisible(false);
             comboBoxLabel.setVisible(false);
@@ -183,6 +183,7 @@ public class EditFrame extends javax.swing.JFrame {
         errorPrice.setText("");
         errorDescription.setText("");
         errorShelf.setText("");
+        errorComboBox.setText("");
     }
 
     public void ComboBoxRead() {
@@ -216,95 +217,115 @@ public class EditFrame extends javax.swing.JFrame {
             }
         }
     }
-    
+
     public boolean ErrorHandler() {
-        
-        if (consult.equals("Entity")) {
+        tests = 0;
+        testsPass = 0;
+
+        if (nameField.isVisible()) {
+            tests += 1;
             if (state.equals("Deposit")) {
-                
+                //Name as Description
                 if (nameField.getText().length() == 0) {
                     errorName.setText("The description cannot be blank");
                 } else if (nameField.getText().length() > 50) {
                     errorName.setText("The description is too long (50+)");
                 } else {
-                    TestsPass += 1;
+                    testsPass += 1;
                     errorName.setText("");
                 }
-    
-                if (priceField.getText().length() == 0) {
-                    errorPrice.setText("The localization cannot be blank");
-                } else if (priceField.getText().length() > 25) {
-                    errorPrice.setText("The localization is too long (25+)");
-                } else {
-                    TestsPass += 1;
-                    errorPrice.setText("");
-                }
             } else {
-                if (idField.getText().matches("^[A-Z]{2}\\d{2}$")) {
-                    TestsPass += 1;
-                    errorId.setText("");
-                } else {
-                    errorId.setText("The ID format is not adecuate (AA00)");
-                }
-
+                //Name as Name
                 if (nameField.getText().length() == 0) {
                     errorName.setText("The name cannot be blank");
                 } else if (nameField.getText().length() > 25) {
                     errorName.setText("The name is too long (25+)");
                 } else {
-                    TestsPass += 1;
+                    testsPass += 1;
                     errorName.setText("");
                 }
+            }
+        }
 
+        if (priceField.isVisible()) {
+            tests += 1;
+            if (consult.equals("Entity") && state.equals("Products") || consult.equals("Relation") && !state.equals("Deposit")) {
+                //Price as price
                 if (priceField.getText().length() == 0) {
                     errorPrice.setText("The price cannot be blank");
                 } else if (priceField.getText().length() > 25) {
                     errorPrice.setText("The price is too long(25+)");
                 } else if (priceField.getText().matches("^\\d+(\\.\\d+)?$")) {
                     errorPrice.setText("");
-                    TestsPass += 1;
+                    testsPass += 1;
                 } else {
                     errorPrice.setText("The price format is not adecuate (decimal)");
                 }
-
-                if (descriptionField.getText().length() == 0) {
-                    errorDescription.setText("The description cannot be blank");
-                } else if (descriptionField.getText().length() > 50) {
-                    errorDescription.setText("The description is too long(50+)");
+            } else if (consult.equals("Entity") && state.equals("Deposit")) {
+                //Price as Localization
+                if (priceField.getText().length() == 0) {
+                    errorPrice.setText("The localization cannot be blank");
+                } else if (priceField.getText().length() > 25) {
+                    errorPrice.setText("The localization is too long (25+)");
                 } else {
-                    errorDescription.setText("");
-                    TestsPass += 1;
+                    testsPass += 1;
+                    errorPrice.setText("");
                 }
-
-                if (shelfField.getText().matches("^[A-Z]{1}\\d{1}$")) {
-                    errorShelf.setText("");
-                    TestsPass += 1;
-                } else {
-                    errorShelf.setText("The shelf format is not adecuate (A0)");
-                }
-            }
-        } else {
-
-            if (state.equals("Products")) {
+            } else {
+                //Price as Stock
                 if (priceField.getText().length() == 0) {
                     errorPrice.setText("The stock cannot be 0");
                 } else if (priceField.getText().length() > 7) {
                     errorPrice.setText("The stock is too long(7)");
                 } else if (priceField.getText().matches("^[0-9]+$")) {
                     errorPrice.setText("");
-                    TestsPass += 1;
+                    testsPass += 1;
                 } else {
                     errorPrice.setText("The stock format is not adecuate (decimal)");
                 }
             }
         }
-        
-        if (TestsPass == tests) {
-            valid = true;
-            this.dispose();
+
+        if (idField.isVisible()) {
+            tests += 1;
+            //Id Field
+            if (idField.getText().matches("^[A-Z]{2}\\d{2}$")) {
+                testsPass += 1;
+                errorId.setText("");
+            } else {
+                errorId.setText("The ID format is not adecuate (AA00)");
+            }
         }
-        
-        return valid;
+
+        if (descriptionField.isVisible()) {
+            tests += 1;
+            //Description Field
+            if (descriptionField.getText().length() == 0) {
+                errorDescription.setText("The description cannot be blank");
+            } else if (descriptionField.getText().length() > 50) {
+                errorDescription.setText("The description is too long(50+)");
+            } else {
+                errorDescription.setText("");
+                testsPass += 1;
+            }
+        }
+
+        if (shelfField.isVisible()) {
+            tests += 1;
+            //Shelf Field
+            if (shelfField.getText().matches("^[A-Z]{1}\\d{1}$")) {
+                errorShelf.setText("");
+                testsPass += 1;
+            } else {
+                errorShelf.setText("The shelf format is not adecuate (A0)");
+            }
+        }
+
+        if (testsPass == tests) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -336,6 +357,7 @@ public class EditFrame extends javax.swing.JFrame {
         shelfLabel = new javax.swing.JLabel();
         jComboBox1 = new javax.swing.JComboBox<>();
         comboBoxLabel = new javax.swing.JLabel();
+        errorComboBox = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -387,14 +409,20 @@ public class EditFrame extends javax.swing.JFrame {
         errorId.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
         errorId.setForeground(new java.awt.Color(255, 51, 51));
         errorId.setText("jLabel4");
+        errorId.setMaximumSize(new java.awt.Dimension(222, 16));
+        errorId.setMinimumSize(new java.awt.Dimension(222, 16));
 
         errorName.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
         errorName.setForeground(new java.awt.Color(255, 51, 51));
         errorName.setText("jLabel5");
+        errorName.setMaximumSize(new java.awt.Dimension(222, 16));
+        errorName.setMinimumSize(new java.awt.Dimension(222, 16));
 
         errorPrice.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
         errorPrice.setForeground(new java.awt.Color(255, 51, 51));
         errorPrice.setText("jLabel6");
+        errorPrice.setMaximumSize(new java.awt.Dimension(222, 16));
+        errorPrice.setMinimumSize(new java.awt.Dimension(222, 16));
 
         descriptionField.setPreferredSize(new java.awt.Dimension(222, 22));
         descriptionField.addActionListener(new java.awt.event.ActionListener() {
@@ -406,13 +434,17 @@ public class EditFrame extends javax.swing.JFrame {
         errorDescription.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
         errorDescription.setForeground(new java.awt.Color(255, 51, 51));
         errorDescription.setText("jLabel7");
+        errorDescription.setMaximumSize(new java.awt.Dimension(222, 16));
+        errorDescription.setMinimumSize(new java.awt.Dimension(222, 16));
 
         descriptionLabel.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
         descriptionLabel.setText("Description");
 
         errorShelf.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
         errorShelf.setForeground(new java.awt.Color(255, 51, 51));
-        errorShelf.setText("jLabel7");
+        errorShelf.setText("jLabel8");
+        errorShelf.setMaximumSize(new java.awt.Dimension(222, 16));
+        errorShelf.setMinimumSize(new java.awt.Dimension(222, 16));
 
         shelfField.setPreferredSize(new java.awt.Dimension(222, 22));
 
@@ -425,6 +457,12 @@ public class EditFrame extends javax.swing.JFrame {
 
         comboBoxLabel.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
         comboBoxLabel.setText("Product");
+
+        errorComboBox.setFont(new java.awt.Font("Microsoft YaHei Light", 0, 12)); // NOI18N
+        errorComboBox.setForeground(new java.awt.Color(255, 51, 51));
+        errorComboBox.setText("jLabel9");
+        errorComboBox.setMaximumSize(new java.awt.Dimension(222, 16));
+        errorComboBox.setMinimumSize(new java.awt.Dimension(222, 16));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -441,36 +479,36 @@ public class EditFrame extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(idField, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(errorId)
-                                .addGap(184, 184, 184))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(comboBoxLabel)
-                                .addGap(18, 18, 18)
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(nameLabel)
                                 .addGap(18, 18, 18)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(errorName)))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(nameField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(errorName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(priceLabel)
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(errorPrice)
-                                    .addComponent(priceField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(errorPrice, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(priceField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(descriptionLabel)
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(errorDescription)
-                                    .addComponent(descriptionField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(errorDescription, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(descriptionField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(shelfLabel)
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(errorShelf)
-                                    .addComponent(shelfField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                    .addComponent(errorShelf, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(shelfField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(comboBoxLabel)
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(errorId, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jComboBox1, javax.swing.GroupLayout.Alignment.TRAILING, 0, 223, Short.MAX_VALUE)
+                                    .addComponent(errorComboBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addGap(44, 44, 44))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton1)
@@ -486,36 +524,38 @@ public class EditFrame extends javax.swing.JFrame {
                     .addComponent(idField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(idLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(errorId)
+                .addComponent(errorId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(comboBoxLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(errorComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(nameLabel))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
-                .addComponent(errorName)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                .addComponent(errorName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(priceField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(priceLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(errorPrice)
+                .addComponent(errorPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(descriptionField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(descriptionLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(errorDescription)
+                .addComponent(errorDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(shelfField, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(shelfLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(errorShelf)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(errorShelf, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
@@ -559,10 +599,7 @@ public class EditFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_descriptionFieldActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-
-        ErrorHandler();
-        
-        if (valid) {
+        if (ErrorHandler()) {
             if (isUpdate == true) {
                 if (consult.equals("Entity")) {
                     if (state.equals("Deposit")) {
@@ -573,15 +610,16 @@ public class EditFrame extends javax.swing.JFrame {
                         dao.updateProduct(id, idField.getText(), nameField.getText(), descriptionField.getText(), Double.parseDouble(priceField.getText()), shelfField.getText());
                     }
                     v.Reload();
+                    this.dispose();
                 } else {
                     if (state.equals("Deposit")) {
                         //UPDATE PRODUCT IN DEPOSIT
                         dao.updateStored(composedID[0], composedID[1], Integer.parseInt(priceField.getText()));
                     }
                     det.Reload();
+                    this.dispose();
                 }
             } else {
-
                 if (consult.equals("Entity")) {
                     if (state.equals("Deposit")) {
                         //ADD DEPOSIT
@@ -591,22 +629,25 @@ public class EditFrame extends javax.swing.JFrame {
                         dao.createProduct(idField.getText(), nameField.getText(), descriptionField.getText(), Double.parseDouble(priceField.getText()), shelfField.getText());
                     }
                     v.Reload();
+                    this.dispose();
                 } else {
                     if (state.equals("Deposit")) {
                         //ADD PRODUCT IN DEPOSIT
                         int productId = productMap.get(jComboBox1.getSelectedItem().toString());
                         if (!dao.isProductInDeposit(id, productId)) {
                             dao.createStored(id, productId, Integer.parseInt(priceField.getText()));
+                            this.dispose();
                         } else {
-                            System.out.println("El producto ya existe en el depósito.");
+                            errorComboBox.setText("El producto ya existe en el depósito.");
                         }
                     } else if (state.equals("Products")) {
                         //ADD DEPOSIT IN PRODUCT 
                         int depositId = productMap.get(jComboBox1.getSelectedItem().toString());
                         if (!dao.isDepositInProduct(id, depositId)) {
                             dao.createStored(depositId, id, Integer.parseInt(priceField.getText()));
+                            this.dispose();
                         } else {
-                            System.out.println("El depósito ya está asociado al producto.");
+                            errorComboBox.setText("El depósito ya está asociado al producto.");
                         }
 
                     } else if (state.equals("Parent Products")) {
@@ -614,8 +655,9 @@ public class EditFrame extends javax.swing.JFrame {
                         int productId = productMap.get(jComboBox1.getSelectedItem().toString());
                         if (!dao.isParentComponentExists(productId, id)) {
                             dao.createComponent(productId, id);
+                            this.dispose();
                         } else {
-                            System.out.println("El producto padre ya está asociado a este producto hijo.");
+                            errorComboBox.setText("El producto padre ya está asociado a este producto hijo.");
                         }
 
                     } else {
@@ -623,15 +665,15 @@ public class EditFrame extends javax.swing.JFrame {
                         int productId = productMap.get(jComboBox1.getSelectedItem().toString());
                         if (!dao.isParentComponentExists(id, productId)) {
                             dao.createComponent(id, productId);
+                            this.dispose();
                         } else {
-                            System.out.println("El producto hijo ya está asociado al producto padre.");
+                            errorComboBox.setText("El producto hijo ya está asociado al producto padre.");
                         }
                     }
                     det.Reload();
                 }
             }
         }
-        this.dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
@@ -642,6 +684,7 @@ public class EditFrame extends javax.swing.JFrame {
     private javax.swing.JLabel comboBoxLabel;
     private javax.swing.JTextField descriptionField;
     private javax.swing.JLabel descriptionLabel;
+    private javax.swing.JLabel errorComboBox;
     private javax.swing.JLabel errorDescription;
     private javax.swing.JLabel errorId;
     private javax.swing.JLabel errorName;
