@@ -61,10 +61,14 @@ public class DetailsFrame extends javax.swing.JFrame {
         if (state.equals("Products")) {
             jTabbedPane1.addChangeListener(e -> {
                 switch (jTabbedPane1.getSelectedIndex()) {
-                    case 0 -> this.state = "Products";
-                    case 1 -> this.state = "Parent Products";
-                    case 2 -> this.state = "Child Products";
-                    default -> this.state = "Deposit";
+                    case 0 ->
+                        this.state = "Products";
+                    case 1 ->
+                        this.state = "Parent Products";
+                    case 2 ->
+                        this.state = "Child Products";
+                    default ->
+                        this.state = "Deposit";
                 }
             });
         }
@@ -129,22 +133,6 @@ public class DetailsFrame extends javax.swing.JFrame {
         jTable1.setSelectionForeground(jTable1.getForeground());
     }
 
-    private Object[][] convertProductListToData(List<String> dbList) {
-
-        int productCount = dbList.size();
-        Object[][] data = new Object[productCount][4];
-
-        for (int i = 0; i < productCount; i++) {
-            String[] productData = dbList.get(i).split(" - ");
-
-            data[i][0] = productData.length > 0 ? productData[0] : "";
-            data[i][1] = productData.length > 1 ? productData[1] : "";
-            data[i][2] = productData.length > 2 ? productData[2] : "";
-            data[i][3] = "Delete";
-        }
-        return data;
-    }
-
     public void LoadProductsOfDeposit(int id_deposit) {
 
         List<String> depositos = dao.getProductsInDeposit(id_deposit);
@@ -173,20 +161,6 @@ public class DetailsFrame extends javax.swing.JFrame {
         jTable1.setSelectionBackground(jTable1.getBackground());
         jTable1.setSelectionForeground(jTable1.getForeground());
 
-    }
-
-    private Object[][] convertDepositListToData(List<String> depositos) {
-        Object[][] data = new Object[depositos.size()][6];
-
-        for (int i = 0; i < depositos.size(); i++) {
-            String[] depositoDetails = depositos.get(i).split(" - ");
-            for (int j = 0; j < depositoDetails.length; j++) {
-                data[i][j] = depositoDetails[j];
-            }
-            data[i][4] = "Configure";
-            data[i][5] = "Delete";
-        }
-        return data;
     }
 
     public void LoadChildComponentsOfProduct(int id_prod_parent) {
@@ -241,6 +215,36 @@ public class DetailsFrame extends javax.swing.JFrame {
         jTable2.setSelectionForeground(jTable2.getForeground());
     }
 
+    private Object[][] convertProductListToData(List<String> dbList) {
+
+        int productCount = dbList.size();
+        Object[][] data = new Object[productCount][4];
+
+        for (int i = 0; i < productCount; i++) {
+            String[] productData = dbList.get(i).split(" - ");
+
+            data[i][0] = productData.length > 0 ? productData[0] : "";
+            data[i][1] = productData.length > 1 ? productData[1] : "";
+            data[i][2] = productData.length > 2 ? productData[2] : "";
+            data[i][3] = "Delete";
+        }
+        return data;
+    }
+
+    private Object[][] convertDepositListToData(List<String> depositos) {
+        Object[][] data = new Object[depositos.size()][6];
+
+        for (int i = 0; i < depositos.size(); i++) {
+            String[] depositoDetails = depositos.get(i).split(" - ");
+            for (int j = 0; j < depositoDetails.length; j++) {
+                data[i][j] = depositoDetails[j];
+            }
+            data[i][4] = "Configure";
+            data[i][5] = "Delete";
+        }
+        return data;
+    }
+
     private Object[][] convertComponentListToData(List<String> components) {
         Object[][] data = new Object[components.size()][4];
 
@@ -254,10 +258,6 @@ public class DetailsFrame extends javax.swing.JFrame {
             data[i][3] = "Delete";
         }
         return data;
-    }
-
-    public void OnDispose() {
-        v.setEnabled(true);
     }
 
     public void openEditFrame(int row) {
@@ -302,6 +302,10 @@ public class DetailsFrame extends javax.swing.JFrame {
 
         ClearTables();
         DisplayTables();
+    }
+
+    public void OnDispose() {
+        v.setEnabled(true);
     }
 
     /**

@@ -177,15 +177,6 @@ public class EditFrame extends javax.swing.JFrame {
         }
     }
 
-    private void HideErrors() {
-        errorId.setText("");
-        errorName.setText("");
-        errorPrice.setText("");
-        errorDescription.setText("");
-        errorShelf.setText("");
-        errorComboBox.setText("");
-    }
-
     public void ComboBoxRead() {
         productMap = new HashMap<>();
         int idToExclude;
@@ -216,6 +207,15 @@ public class EditFrame extends javax.swing.JFrame {
                 }
             }
         }
+    }
+
+    private void HideErrors() {
+        errorId.setText("");
+        errorName.setText("");
+        errorPrice.setText("");
+        errorDescription.setText("");
+        errorShelf.setText("");
+        errorComboBox.setText("");
     }
 
     public boolean ErrorHandler() {

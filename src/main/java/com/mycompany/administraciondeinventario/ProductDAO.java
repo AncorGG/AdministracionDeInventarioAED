@@ -18,10 +18,12 @@ import java.util.List;
 public class ProductDAO {
 
     //READ
+    
     public List<String> getDeposits() {
         List<String> entidades = new ArrayList<>();
         String sql = "SELECT * FROM Deposit";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql); 
+                ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 entidades.add(rs.getInt("id_deposit") + " - "
                         + rs.getString("description") + " - " + rs.getString("localization"));
@@ -36,7 +38,8 @@ public class ProductDAO {
     public List<String> getProducts() {
         List<String> entidades = new ArrayList<>();
         String sql = "SELECT * FROM Products";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
+        try (Connection connection = ConnectionDB.OpenConnection(); 
+                PreparedStatement pstmt = connection.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 entidades.add(rs.getInt("id_product") + " - "
                         + rs.getString("cod_product") + " - " + rs.getString("name")
@@ -53,7 +56,8 @@ public class ProductDAO {
         String[] productDetails = new String[6];
         String sql = "SELECT id_product, cod_product, name, price, description, shelf FROM Products LIMIT 1 OFFSET ?";
 
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection connection = ConnectionDB.OpenConnection(); 
+                PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setInt(1, position);
 
@@ -98,36 +102,6 @@ public class ProductDAO {
         return depositDetails;
     }
 
-    public List<String> getStored() {
-        List<String> entidades = new ArrayList<>();
-        String sql = "SELECT * FROM Stored";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
-                entidades.add(rs.getInt("id_deposit") + " - "
-                        + rs.getInt("id_product") + " - " + rs.getInt("quantity"));
-            }
-            ConnectionDB.CloseConnection(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return entidades;
-    }
-
-    public List<String> getComponents() {
-        List<String> entidades = new ArrayList<>();
-        String sql = "SELECT * FROM Components";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
-            while (rs.next()) {
-                entidades.add(rs.getInt("id_prod_parent") + " - "
-                        + rs.getInt("id_prod_child"));
-            }
-            ConnectionDB.CloseConnection(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return entidades;
-    }
-
     public List<String> getProductsInDeposit(int id_deposit) {
         List<String> products = new ArrayList<>();
         String sql = "SELECT p.id_product, p.cod_product, p.name, s.quantity "
@@ -135,7 +109,8 @@ public class ProductDAO {
                 + "INNER JOIN Stored s ON p.id_product = s.id_product "
                 + "WHERE s.id_deposit = ?";
 
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection connection = ConnectionDB.OpenConnection(); 
+                PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, id_deposit);
             ResultSet rs = pstmt.executeQuery();
 
@@ -151,21 +126,6 @@ public class ProductDAO {
             e.printStackTrace();
         }
         return products;
-    }
-
-    public boolean isProductInDeposit(int id_deposit, int id_product) {
-        String sql = "SELECT COUNT(*) AS count FROM Stored WHERE id_deposit = ? AND id_product = ?";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, id_deposit);
-            pstmt.setInt(2, id_product);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("count") > 0;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public List<String> getDepositsOfProduct(int id_product) {
@@ -190,22 +150,6 @@ public class ProductDAO {
             e.printStackTrace();
         }
         return deposits;
-    }
-    
-    
-    public boolean isDepositInProduct(int id_product, int id_deposit) {
-        String sql = "SELECT COUNT(*) AS count FROM Stored WHERE id_product = ? AND id_deposit = ?";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, id_product);
-            pstmt.setInt(2, id_deposit);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("count") > 0;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public List<String> getChildComponents(int parentId) {
@@ -234,7 +178,6 @@ public class ProductDAO {
         return childComponents;
     }
 
-
     public List<String> getParentComponents(int childId) {
         List<String> parentComponents = new ArrayList<>();
         String sql = "SELECT p.id_product, p.cod_product, p.name, p.description, p.shelf, p.price "
@@ -259,27 +202,59 @@ public class ProductDAO {
         }
         return parentComponents;
     }
-    
-    public boolean isParentComponentExists(int parentId, int childId) {
-    String sql = "SELECT COUNT(*) AS count FROM Components WHERE id_prod_parent = ? AND id_prod_child = ?";
-    try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
-        pstmt.setInt(1, parentId);
-        pstmt.setInt(2, childId);
-        ResultSet rs = pstmt.executeQuery();
-        if (rs.next()) {
-            return rs.getInt("count") > 0;
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return false;
-}
 
+    public boolean isProductInDeposit(int id_deposit, int id_product) {
+        String sql = "SELECT COUNT(*) AS count FROM Stored WHERE id_deposit = ? AND id_product = ?";
+        try (Connection connection = ConnectionDB.OpenConnection(); 
+                PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, id_deposit);
+            pstmt.setInt(2, id_product);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count") > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isDepositInProduct(int id_product, int id_deposit) {
+        String sql = "SELECT COUNT(*) AS count FROM Stored WHERE id_product = ? AND id_deposit = ?";
+        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, id_product);
+            pstmt.setInt(2, id_deposit);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count") > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isParentComponentExists(int parentId, int childId) {
+        String sql = "SELECT COUNT(*) AS count FROM Components WHERE id_prod_parent = ? AND id_prod_child = ?";
+        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, parentId);
+            pstmt.setInt(2, childId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count") > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     // UPDATE
     public void updateProduct(int idProd, String codProd, String name, String description, double price, String shelf) {
-        String sql = "UPDATE Products SET cod_product = ?, name = ?, description = ?, price = ?, shelf = ? WHERE id_product = ?";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
+        String sql = "UPDATE Products SET cod_product = ?, name = ?, description = ?, "
+                + "price = ?, shelf = ? WHERE id_product = ?";
+        try (Connection connection = ConnectionDB.OpenConnection(); 
+                PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, codProd);
             stmt.setString(2, name);
             stmt.setString(3, description);
@@ -322,7 +297,8 @@ public class ProductDAO {
     //CREATE
     public void createProduct(String codProd, String name, String description, double price, String shelf) {
         String sql = "INSERT INTO Products (cod_product, name, description, price, shelf) VALUES (?, ?, ?, ?, ?)";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = ConnectionDB.OpenConnection(); 
+                PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, codProd);
             stmt.setString(2, name);
             stmt.setString(3, description);
@@ -375,7 +351,8 @@ public class ProductDAO {
     //DELETE
     public void deleteProduct(int idProd) {
         String sql = "DELETE FROM Products WHERE id_product = ?";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = ConnectionDB.OpenConnection(); 
+                PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, idProd);
             stmt.executeUpdate();
             ConnectionDB.CloseConnection(connection);
@@ -397,7 +374,8 @@ public class ProductDAO {
 
     public void deleteStored(int idDep, int idProd) {
         String sql = "DELETE FROM Stored WHERE id_deposit = ? AND id_product = ?";
-        try (Connection connection = ConnectionDB.OpenConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = ConnectionDB.OpenConnection(); 
+                PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, idDep);
             stmt.setInt(2, idProd);
             stmt.executeUpdate();
